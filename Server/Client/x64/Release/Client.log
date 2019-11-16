@@ -1,0 +1,8 @@
+﻿  main.cpp
+c:\users\s189069\source\repos\server\client\main.cpp(23): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+main.obj : error LNK2001: unresolved external symbol __imp_WSAGetLastError
+main.obj : error LNK2001: unresolved external symbol __imp_sendto
+main.obj : error LNK2001: unresolved external symbol __imp_htons
+main.obj : error LNK2001: unresolved external symbol __imp_socket
+main.obj : error LNK2001: unresolved external symbol __imp_inet_addr
+C:\Users\s189069\source\repos\Server\x64\Release\Client.exe : fatal error LNK1120: 5 unresolved externals
