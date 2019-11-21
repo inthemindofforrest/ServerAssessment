@@ -8,6 +8,15 @@ void Client::StartClient()
 	AssignServerSocket();
 
 	SendPacket("Join");
+
+	Recieve_Thread = std::thread([&]
+	{
+		while (true)
+		{
+			ReceivePacket();
+		}
+	});
+
 }
 
 void Client::StartCustomClient()
@@ -27,7 +36,6 @@ void Client::StartCustomClient()
 
 void Client::UpdateClient()
 {
-	ReceivePacket();
 	SendPacket();
 }
 
@@ -35,7 +43,7 @@ bool Client::WSAStart()
 {
 	if (WSAStartup(winsock_version, &winsock_data))//Return 0 if successful
 	{
-		printf("WSAStartup failed: %d", WSAGetLastError());
+		printf("WSAStartup failed: %d on line: %d", WSAGetLastError(), __LINE__);
 		return false;
 	}
 	return true;
@@ -70,7 +78,7 @@ bool Client::SendPacket()
 	flags = 0;
 	if (sendto(sock, SentData, sizeof(SentData), flags, (SOCKADDR*)&server_address, sizeof(server_address)) == SOCKET_ERROR)
 	{
-		printf("sendto failed: %d", WSAGetLastError());
+		printf("sendto failed: %d on line: %d", WSAGetLastError(), __LINE__);
 
 		return false;
 	}
@@ -91,7 +99,7 @@ bool Client::SendPacket(const char* _data)
 	flags = 0;
 	if (sendto(sock, _data, sizeof(_data), flags, (SOCKADDR*)&server_address, sizeof(server_address)) == SOCKET_ERROR)
 	{
-		printf("sendto failed: %d", WSAGetLastError());
+		printf("sendto failed: %d on line: %d", WSAGetLastError(), __LINE__);
 
 		return false;
 	}
@@ -112,11 +120,12 @@ bool Client::ReceivePacket()
 	//Waiting for reply ;)
 	flags = 0;
 	from_size = sizeof(from);
+
 	bytes_received = recvfrom(sock, buffer, IDENTIFY_BUFFER_SIZE, flags, (SOCKADDR*)&from, &from_size);
 
 	if (bytes_received == SOCKET_ERROR)
 	{
-		printf("recvfrom returned SOCKET_ERROR, WSAGetLastError() %d", WSAGetLastError());
+		printf("recvfrom returned SOCKET_ERROR, WSAGetLastError() %d on line: %d", WSAGetLastError(), __LINE__);
 		return false;
 	}
 

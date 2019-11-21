@@ -2,6 +2,7 @@
 #include <WinSock2.h>
 #include <stdio.h>
 #include <string.h>
+#include<thread>
 
 #pragma warning(disable:4996) 
 
@@ -26,6 +27,9 @@ class Client
 	char SentData[IDENTIFY_BUFFER_SIZE];
 
 public:
+
+	std::thread Recieve_Thread;
+
 	bool is_running = 1;
 
 	void StartClient();

@@ -16,4 +16,6 @@ public:
 	bool RemoveClientFromSession(SOCKADDR_IN _Address);
 	bool AvailableSpace();
 	bool DisplayConnectedClients(int _SessionID);
+
+	bool CheckForClient(SOCKADDR_IN _Address);
 };

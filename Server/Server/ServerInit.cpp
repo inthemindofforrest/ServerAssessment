@@ -1,5 +1,6 @@
 #include "ServerInit.h"
 #include <cstdlib>
+#include <string.h>
 
 Server::Server()
 {
@@ -154,13 +155,13 @@ bool Server::RecievedPacket()
 		return false;
 	}
 
-	if(strcmp(SendingData,"Join"))
+	//if(strcmp(SendingData,"Join") == 0)
 		CheckForSession(from);
 
 	return true;
 }
 
-void Server::CreatePacket()//BROKEN FUNCTION PLEASE WORK!!!!!!!!!!!!!!!!!!!!!!!!
+void Server::CreatePacket()
 {
 	//Create return Packet
 	strcpy(SendingData, buffer);
@@ -189,14 +190,17 @@ bool Server::SendPacket()
 
 void Server::CheckForSession(SOCKADDR_IN _Address)
 {
-	printf("Client IP: %d.%d.%d.%d:%d joined the session\n",
-		_Address.sin_addr.S_un.S_un_b.s_b1,
-		_Address.sin_addr.S_un.S_un_b.s_b2,
-		_Address.sin_addr.S_un.S_un_b.s_b3,
-		_Address.sin_addr.S_un.S_un_b.s_b4,
-		_Address.sin_port);
+
 	CreatePacket();
 	SendPacket();
+
+	for (int i = 0; i < SessionsAmount; i++)
+	{
+		if (Sessions[i].CheckForClient(_Address))
+		{
+			return;
+		}
+	}
 
 	for (int i = 0; i < SessionsAmount; i++)
 	{
@@ -204,6 +208,12 @@ void Server::CheckForSession(SOCKADDR_IN _Address)
 		{
 			//Place the use into that session
 			Sessions[i].AddClientToSession(_Address);
+			printf("Client IP: %d.%d.%d.%d:%d joined the session\n",
+				_Address.sin_addr.S_un.S_un_b.s_b1,
+				_Address.sin_addr.S_un.S_un_b.s_b2,
+				_Address.sin_addr.S_un.S_un_b.s_b3,
+				_Address.sin_addr.S_un.S_un_b.s_b4,
+				_Address.sin_port);
 			return;
 		}
 	}
@@ -211,14 +221,26 @@ void Server::CheckForSession(SOCKADDR_IN _Address)
 
 void Server::ServerConsole()
 {
+	const int AmountOfCommands = 2;
+	const int LengthOfCommands = 10;
+	char Commands[AmountOfCommands][LengthOfCommands] = {"session", "\\help"};
+
 	char Message[IDENTIFY_BUFFER_SIZE];
 	gets_s(Message, IDENTIFY_BUFFER_SIZE);
-	if (strcmp(Message, "Session") == 0)
+	if (strcmp(Message, "session") == 0)
 	{
 		for (int i = 0; i < SessionsAmount; i++)
 		{
 			Sessions[i].DisplayConnectedClients(i);
 		}
+		if (SessionsAmount == 0)
+		{
+			printf("No Sessions Opened\n");
+		}
+	}
+	else
+	{
+		printf("Command: \"%s\" not found.\n", Message);
 	}
 }
 

@@ -66,3 +66,20 @@ bool Session::DisplayConnectedClients(int _SessionID)
 	}
 	return false;
 }
+
+bool Session::CheckForClient(SOCKADDR_IN _Address)
+{
+	for (int i = 0; i < CurrentClientAmount; i++)
+	{
+		if (Clients[i].sin_addr.S_un.S_un_b.s_b1 == _Address.sin_addr.S_un.S_un_b.s_b1 &&
+			Clients[i].sin_addr.S_un.S_un_b.s_b2 == _Address.sin_addr.S_un.S_un_b.s_b2 &&
+			Clients[i].sin_addr.S_un.S_un_b.s_b3 == _Address.sin_addr.S_un.S_un_b.s_b3 &&
+			Clients[i].sin_addr.S_un.S_un_b.s_b4 == _Address.sin_addr.S_un.S_un_b.s_b4 &&
+			Clients[i].sin_port == _Address.sin_port)
+		{
+			return true;
+			//Client Already Exists
+		}
+	}
+	return false;
+}
