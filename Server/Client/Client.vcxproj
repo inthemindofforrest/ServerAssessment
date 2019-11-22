@@ -76,9 +76,14 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Ws2_32.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <SubSystem>NotSet</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -87,9 +92,14 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Ws2_32.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <SubSystem>NotSet</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

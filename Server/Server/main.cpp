@@ -13,8 +13,6 @@ int main()
 	while (NewServer.is_running)
 	{
 		NewServer.ServerUpdate();
-		NewServer.RecievedPacket();
 	}
-
 	return 0;
 }

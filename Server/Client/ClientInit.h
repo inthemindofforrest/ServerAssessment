@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include<thread>
+#include <atomic>
 
 #pragma warning(disable:4996) 
 
@@ -26,13 +27,16 @@ class Client
 	char RecievedData[IDENTIFY_BUFFER_SIZE];
 	char SentData[IDENTIFY_BUFFER_SIZE];
 
+	std::atomic<bool> HasSentMessage;
+
 public:
 
 	std::thread Recieve_Thread;
 
-	bool is_running = 1;
+	std::atomic<bool> is_running;
 
 	void StartClient();
+	bool StopClient();
 	void StartCustomClient();
 	void UpdateClient();
 
@@ -45,4 +49,5 @@ public:
 	bool SendPacket();
 	bool SendPacket(const char* _data);
 	bool ReceivePacket();
+	bool ClientConsole(char* _Message);
 };

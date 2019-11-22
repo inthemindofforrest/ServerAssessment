@@ -4,6 +4,7 @@
 #include <string>
 #include"Session.h"
 #include<thread>
+#include<atomic>
 
 #pragma warning(disable:4996) 
 
@@ -24,19 +25,17 @@ class Server
 	int bytes_recieved;
 #pragma endregion
 
-	
-
 	static const int SessionsAmount = 5;
 	Session Sessions[SessionsAmount];
 
 
 	char SendingData[IDENTIFY_BUFFER_SIZE];
 	
-	
+	void Shutdown();
 
 public:
 	std::thread Console_Thread;
-	bool is_running = 1;
+	std::atomic<bool> is_running;
 
 	Server();
 
@@ -57,6 +56,7 @@ public:
 
 	void CreatePacket();
 	bool SendPacket();
+	bool SendPacket(const char* _Message);
 
 	void CheckForSession(SOCKADDR_IN _Address);
 

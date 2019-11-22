@@ -2,14 +2,34 @@
 #include <cstdlib>
 #include <string.h>
 
+void Server::Shutdown()
+{
+	if (shutdown(sock, SD_BOTH) == SOCKET_ERROR)
+	{
+		printf("Shutdown failed: %d on line: %d\n", WSAGetLastError(), __LINE__);
+		closesocket(sock);
+		WSACleanup();
+		return;
+	}
+	printf("Shutdown Server\n");
+	is_running = false;
+
+
+	printf("\n\n");
+	system("PAUSE");
+	exit(0);
+}
+
 Server::Server()
 {
 	winsock_version = 0x202;//Which version of Winsock we are using
 	winsock_data;//Struct of data
 
+	is_running = true;
+
 	Console_Thread = std::thread([&]
 	{
-		while (true)
+		while (is_running)
 		{
 			ServerConsole();
 		}
@@ -44,8 +64,8 @@ void Server::StartConfigServer()
 
 void Server::ServerUpdate()
 {
-	RecievedPacket();
-	
+	if (is_running)
+		RecievedPacket();
 }
 
 bool Server::WSAStart()
@@ -188,6 +208,22 @@ bool Server::SendPacket()
 	return true;
 }
 
+bool Server::SendPacket(const char* _Message)
+{
+	//Send packet to Client
+	int buffer_length = sizeof(SendingData);
+	flags = 0;
+	SOCKADDR* to = (SOCKADDR*)&from;
+	int to_length = sizeof(from);
+
+	if (sendto(sock, _Message, sizeof(_Message), flags, to, to_length) == SOCKET_ERROR)
+	{
+		printf("sendto failed: %d", WSAGetLastError());
+		return false;
+	}
+	return true;
+}
+
 void Server::CheckForSession(SOCKADDR_IN _Address)
 {
 
@@ -214,6 +250,8 @@ void Server::CheckForSession(SOCKADDR_IN _Address)
 				_Address.sin_addr.S_un.S_un_b.s_b3,
 				_Address.sin_addr.S_un.S_un_b.s_b4,
 				_Address.sin_port);
+
+			SendPacket("Join");
 			return;
 		}
 	}
@@ -227,20 +265,27 @@ void Server::ServerConsole()
 
 	char Message[IDENTIFY_BUFFER_SIZE];
 	gets_s(Message, IDENTIFY_BUFFER_SIZE);
-	if (strcmp(Message, "session") == 0)
+	if (is_running)
 	{
-		for (int i = 0; i < SessionsAmount; i++)
+		if (strcmp(Message, "session") == 0)
 		{
-			Sessions[i].DisplayConnectedClients(i);
+			for (int i = 0; i < SessionsAmount; i++)
+			{
+				Sessions[i].DisplayConnectedClients(i);
+			}
+			if (SessionsAmount == 0)
+			{
+				printf("No Sessions Opened\n");
+			}
 		}
-		if (SessionsAmount == 0)
+		else if (strcmp(Message, "shutdown") == 0)
 		{
-			printf("No Sessions Opened\n");
+			Shutdown();
 		}
-	}
-	else
-	{
-		printf("Command: \"%s\" not found.\n", Message);
+		else
+		{
+			printf("Command: \"%s\" not found.\n", Message);
+		}
 	}
 }
 
