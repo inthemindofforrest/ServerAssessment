@@ -53,13 +53,19 @@ public:
 	bool SetSocketAddress(char* _Address, int _Port);
 
 	bool RecievedPacket();
+	void ProccessPacket();
 
 	void CreatePacket();
 	bool SendPacket();
 	bool SendPacket(const char* _Message);
 
 	void CheckForSession(SOCKADDR_IN _Address);
-
+	void CheckForSession(SOCKADDR_IN _Address, int _SessionIndex);
+	int* GetSessionCount();
+	void DisconnectFromSessions(SOCKADDR_IN _Address);
 
 	void ServerConsole();
+
+	static bool MatchingSockAddress(SOCKADDR_IN _First, SOCKADDR_IN _Second);
+	static bool ResetSockAddress(SOCKADDR_IN* _Address);
 };

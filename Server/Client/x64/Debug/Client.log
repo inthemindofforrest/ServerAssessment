@@ -1,5 +1,3 @@
 ﻿  ClientInit.cpp
-  main.cpp
-  Generating Code...
-c:\users\s189069\source\repos\serverassessment\server\client\clientinit.cpp(214): warning C4715: 'Client::ClientConsole': not all control paths return a value
+c:\users\s189069\source\repos\serverassessment\server\client\clientinit.cpp(251): warning C4715: 'Client::ClientConsole': not all control paths return a value
   Client.vcxproj -> C:\Users\s189069\source\repos\ServerAssessment\Server\x64\Debug\Client.exe

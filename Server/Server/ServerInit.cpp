@@ -175,10 +175,40 @@ bool Server::RecievedPacket()
 		return false;
 	}
 
-	//if(strcmp(SendingData,"Join") == 0)
-		CheckForSession(from);
+	ProccessPacket();
 
 	return true;
+}
+
+void Server::ProccessPacket()
+{
+	//Process of the PACKETS
+	int32 read_index = 0;
+
+	char Command[IDENTIFY_BUFFER_SIZE] = {'\0'};
+	int Size;
+	int SessionID;
+
+	memcpy(&SessionID, &buffer[read_index], sizeof(SessionID));
+	read_index += sizeof(SessionID);
+	
+	memcpy(&Size, &buffer[read_index], sizeof(Size));
+	read_index += sizeof(Size);
+
+	memcpy(&Command, &buffer[read_index], Size);
+	read_index += Size;
+
+	
+
+	if (strcmp(Command, "Join") == 0)
+	{
+		printf("Player requested to Join Session: %d\n", SessionID);
+		CheckForSession(from, SessionID);
+	}
+ 	else if (strcmp(Command, "Disconnect") == 0)
+	{
+		DisconnectFromSessions(from);
+	}
 }
 
 void Server::CreatePacket()
@@ -257,6 +287,64 @@ void Server::CheckForSession(SOCKADDR_IN _Address)
 	}
 }
 
+void Server::CheckForSession(SOCKADDR_IN _Address, int _SessionIndex)
+{
+	CreatePacket();
+	SendPacket();
+
+	for (int i = 0; i < SessionsAmount; i++)
+	{
+		if (Sessions[i].CheckForClient(_Address))
+		{
+			return;
+		}
+	}
+
+	if (Sessions[_SessionIndex].AvailableSpace())//If there is space in the Session
+	{
+		//Place the use into that session
+		Sessions[_SessionIndex].AddClientToSession(_Address);
+		printf("Client IP: %d.%d.%d.%d:%d joined the session\n",
+			_Address.sin_addr.S_un.S_un_b.s_b1,
+			_Address.sin_addr.S_un.S_un_b.s_b2,
+			_Address.sin_addr.S_un.S_un_b.s_b3,
+			_Address.sin_addr.S_un.S_un_b.s_b4,
+			_Address.sin_port);
+
+		SendPacket("Join");
+		return;
+	}
+}
+
+int * Server::GetSessionCount()
+{
+	int Total[5];
+
+	for (int i = 0; i < 5; i++)
+	{
+		Total[i] = Sessions[i].CurrentClientAmount;
+	}
+
+	return Total;
+}
+
+void Server::DisconnectFromSessions(SOCKADDR_IN _Address)
+{
+	int Size = sizeof(Sessions) / sizeof(Session);
+	for (int i = 0; i < Size; i++)
+	{
+		if (Sessions[i].RemoveClientFromSession(_Address))
+		{
+			printf("%d.%d.%d.%d:%d disconnected from Session(%d)\n",
+				_Address.sin_addr.S_un.S_un_b.s_b1, _Address.sin_addr.S_un.S_un_b.s_b2,
+				_Address.sin_addr.S_un.S_un_b.s_b3, _Address.sin_addr.S_un.S_un_b.s_b4,
+				_Address.sin_port, i);
+			return;
+		}
+	}
+	printf("Client not connected to Server...\n");
+}
+
 void Server::ServerConsole()
 {
 	const int AmountOfCommands = 2;
@@ -287,6 +375,25 @@ void Server::ServerConsole()
 			printf("Command: \"%s\" not found.\n", Message);
 		}
 	}
+}
+
+bool Server::MatchingSockAddress(SOCKADDR_IN _First, SOCKADDR_IN _Second)
+{
+	return(_First.sin_addr.S_un.S_un_b.s_b1 == _Second.sin_addr.S_un.S_un_b.s_b1 &&
+		_First.sin_addr.S_un.S_un_b.s_b2 == _Second.sin_addr.S_un.S_un_b.s_b2 &&
+		_First.sin_addr.S_un.S_un_b.s_b3 == _Second.sin_addr.S_un.S_un_b.s_b3 &&
+		_First.sin_addr.S_un.S_un_b.s_b4 == _Second.sin_addr.S_un.S_un_b.s_b4 &&
+		_First.sin_port == _Second.sin_port);
+}
+
+bool Server::ResetSockAddress(SOCKADDR_IN * _Address)
+{
+	(*_Address).sin_addr.S_un.S_un_b.s_b1 = 0;
+	(*_Address).sin_addr.S_un.S_un_b.s_b2 = 0;
+	(*_Address).sin_addr.S_un.S_un_b.s_b3 = 0;
+	(*_Address).sin_addr.S_un.S_un_b.s_b4 = 0;
+	(*_Address).sin_port = 0;
+	return false;
 }
 
 

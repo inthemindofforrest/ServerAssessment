@@ -159,6 +159,43 @@ bool Client::SendPacket(const char* _data)
 	return true;
 }
 
+bool Client::SendPacket(const char * _data, int _Size, int _NumData)
+{
+	if (is_running)
+	{
+		int Index = 0;
+		char temp[IDENTIFY_BUFFER_SIZE];
+
+		memcpy(&temp[Index], &_NumData, sizeof(_NumData));
+		Index += sizeof(_NumData);
+		
+		memcpy(&temp[Index], &_Size, sizeof(_Size));
+		Index += sizeof(_Size);
+
+		memcpy(&temp[Index], _data, _Size);
+		Index += _Size;
+
+		flags = 0;
+		if (sendto(sock, temp, sizeof(temp), flags, (SOCKADDR*)&server_address, sizeof(server_address)) == SOCKET_ERROR)
+		{
+			printf("sendto failed: %d on line: %d", WSAGetLastError(), __LINE__);
+
+			return false;
+		}
+		else
+		{
+			printf("Sending Package to: %d.%d.%d.%d:%d\n",
+				server_address.sin_addr.S_un.S_un_b.s_b1,
+				server_address.sin_addr.S_un.S_un_b.s_b2,
+				server_address.sin_addr.S_un.S_un_b.s_b3,
+				server_address.sin_addr.S_un.S_un_b.s_b4,
+				server_address.sin_port);
+		}
+		HasSentMessage = true;
+	}
+	return true;
+}
+
 bool Client::ReceivePacket()
 {
 	if (is_running && HasSentMessage)

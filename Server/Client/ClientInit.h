@@ -1,7 +1,7 @@
 #pragma once
 #include <WinSock2.h>
 #include <stdio.h>
-#include <string.h>
+#include <string>
 #include<thread>
 #include <atomic>
 
@@ -48,6 +48,7 @@ public:
 
 	bool SendPacket();
 	bool SendPacket(const char* _data);
+	bool SendPacket(const char* _data, int _Size, int _NumData);
 	bool ReceivePacket();
 	bool ClientConsole(char* _Message);
 };
