@@ -238,7 +238,7 @@ bool Server::SendPacket()
 	return true;
 }
 
-bool Server::SendPacket(const char* _Message)
+bool Server::SendPacket(const char* _Message, int _Size)
 {
 	//Send packet to Client
 	int buffer_length = sizeof(SendingData);
@@ -246,12 +246,53 @@ bool Server::SendPacket(const char* _Message)
 	SOCKADDR* to = (SOCKADDR*)&from;
 	int to_length = sizeof(from);
 
-	if (sendto(sock, _Message, sizeof(_Message), flags, to, to_length) == SOCKET_ERROR)
+	if (sendto(sock, _Message, _Size, flags, to, to_length) == SOCKET_ERROR)
 	{
 		printf("sendto failed: %d", WSAGetLastError());
 		return false;
 	}
 	return true;
+}
+bool Server::SendPacket(const char* _Message, int _Size, SOCKADDR_IN _Return)
+{
+	//Send packet to Client
+	int buffer_length = sizeof(SendingData);
+	flags = 0;
+	SOCKADDR* to = (SOCKADDR*)&_Return;
+	int to_length = sizeof(from);
+
+	if (sendto(sock, _Message, _Size, flags, to, to_length) == SOCKET_ERROR)
+	{
+		printf("sendto failed: %d", WSAGetLastError());
+		return false;
+	}
+	return true;
+}
+
+void Server::SendClientsInfo()
+{
+	int Size = sizeof(Sessions) / sizeof(Session);
+	for (int i = 0; i < Size; i++)//Sessions
+	{
+		for (int j = 0; j < Sessions[i].CurrentClientAmount; j++)//Each player
+		{
+			char Message[IDENTIFY_BUFFER_SIZE];
+			int Index = 0;
+			int CommandLength = 15;
+
+			memcpy(&Message[Index], &CommandLength, sizeof(CommandLength));
+			Index += sizeof(CommandLength);
+
+			memcpy(&Message[Index], "AmountOfPlayers", sizeof("AmountOfPlayers"));
+			Index += sizeof("AmountOfPlayers");
+
+			memcpy(&Message[Index], std::to_string(Sessions[i].CurrentClientAmount).c_str(), sizeof(std::to_string(Sessions[i].CurrentClientAmount).c_str()));
+			Index += sizeof(std::to_string(Sessions[i].CurrentClientAmount).c_str());
+
+			SendPacket(Message,Index, Sessions[i].Clients[j]);
+			//Send Each player amount of people are in session
+		}
+	}
 }
 
 void Server::CheckForSession(SOCKADDR_IN _Address)
@@ -281,7 +322,6 @@ void Server::CheckForSession(SOCKADDR_IN _Address)
 				_Address.sin_addr.S_un.S_un_b.s_b4,
 				_Address.sin_port);
 
-			SendPacket("Join");
 			return;
 		}
 	}
@@ -289,8 +329,8 @@ void Server::CheckForSession(SOCKADDR_IN _Address)
 
 void Server::CheckForSession(SOCKADDR_IN _Address, int _SessionIndex)
 {
-	CreatePacket();
-	SendPacket();
+	//CreatePacket();
+	//SendPacket();
 
 	for (int i = 0; i < SessionsAmount; i++)
 	{
@@ -311,12 +351,11 @@ void Server::CheckForSession(SOCKADDR_IN _Address, int _SessionIndex)
 			_Address.sin_addr.S_un.S_un_b.s_b4,
 			_Address.sin_port);
 
-		SendPacket("Join");
 		return;
 	}
 }
 
-int * Server::GetSessionCount()
+int* Server::GetSessionCount()
 {
 	int Total[5];
 
@@ -339,6 +378,7 @@ void Server::DisconnectFromSessions(SOCKADDR_IN _Address)
 				_Address.sin_addr.S_un.S_un_b.s_b1, _Address.sin_addr.S_un.S_un_b.s_b2,
 				_Address.sin_addr.S_un.S_un_b.s_b3, _Address.sin_addr.S_un.S_un_b.s_b4,
 				_Address.sin_port, i);
+			SendPacket("Disconnect", 10);
 			return;
 		}
 	}
@@ -369,6 +409,10 @@ void Server::ServerConsole()
 		else if (strcmp(Message, "shutdown") == 0)
 		{
 			Shutdown();
+		}
+		else if(strcmp(Message, "Send") == 0)
+		{
+			SendClientsInfo();
 		}
 		else
 		{

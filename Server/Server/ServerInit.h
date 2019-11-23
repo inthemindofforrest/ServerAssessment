@@ -57,7 +57,10 @@ public:
 
 	void CreatePacket();
 	bool SendPacket();
-	bool SendPacket(const char* _Message);
+	bool SendPacket(const char* _Message, int _Size);
+	bool SendPacket(const char* _Message, int _Size, SOCKADDR_IN _Return);
+
+	void SendClientsInfo();
 
 	void CheckForSession(SOCKADDR_IN _Address);
 	void CheckForSession(SOCKADDR_IN _Address, int _SessionIndex);

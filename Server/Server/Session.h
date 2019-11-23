@@ -6,10 +6,9 @@ class Session
 {
 private:
 	static const int MaxClientAmount = 3;//Forever the max players allowed in the session
-	
-	SOCKADDR_IN Clients[MaxClientAmount];
 
 public:
+	SOCKADDR_IN Clients[MaxClientAmount];
 	int CurrentClientAmount = 0;
 
 	Session();

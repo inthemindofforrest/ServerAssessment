@@ -192,6 +192,8 @@ bool Client::SendPacket(const char * _data, int _Size, int _NumData)
 				server_address.sin_port);
 		}
 		HasSentMessage = true;
+
+		DisplayConnection(_data);
 	}
 	return true;
 }
@@ -212,21 +214,13 @@ bool Client::ReceivePacket()
 			return false;
 		}
 
+		ProcessPacket(buffer);
 
 		//Grabe data from packet
 		int32 read_index = 0;
-		memcpy(&RecievedData, &buffer[read_index], sizeof(RecievedData));
+		char Temp[IDENTIFY_BUFFER_SIZE] = { '\0' };
+		memcpy(&RecievedData, &Temp[read_index], sizeof(RecievedData));
 		read_index += sizeof(RecievedData);
-
-		if (strcmp(RecievedData, "Join") == 0)
-		{
-			printf("Joined %d.%d.%d.%d:%d\n",
-				server_address.sin_addr.S_un.S_un_b.s_b1,
-				server_address.sin_addr.S_un.S_un_b.s_b2,
-				server_address.sin_addr.S_un.S_un_b.s_b3,
-				server_address.sin_addr.S_un.S_un_b.s_b4,
-				server_address.sin_port);
-		}
 	}
 	return true;
 }
@@ -248,4 +242,49 @@ bool Client::ClientConsole(char * _Message)
 		}
 		return false;
 	}
+}
+
+void Client::DisplayConnection(const char * _data)
+{
+	if (strcmp(_data, "Join") == 0)
+	{
+		printf("Joined %d.%d.%d.%d:%d\n",
+			server_address.sin_addr.S_un.S_un_b.s_b1,
+			server_address.sin_addr.S_un.S_un_b.s_b2,
+			server_address.sin_addr.S_un.S_un_b.s_b3,
+			server_address.sin_addr.S_un.S_un_b.s_b4,
+			server_address.sin_port);
+	}
+	if (strcmp(_data, "Disconnect") == 0)
+	{
+		printf("Disconnected from %d.%d.%d.%d:%d\n",
+			server_address.sin_addr.S_un.S_un_b.s_b1,
+			server_address.sin_addr.S_un.S_un_b.s_b2,
+			server_address.sin_addr.S_un.S_un_b.s_b3,
+			server_address.sin_addr.S_un.S_un_b.s_b4,
+			server_address.sin_port);
+	}
+}
+
+void Client::ProcessPacket(const char * _Data)
+{
+	int Index = 0;
+	char Command[IDENTIFY_BUFFER_SIZE] = {'\0'};
+	int SizeOfCommand;
+
+	memcpy(&SizeOfCommand, &_Data[Index], sizeof(int));
+	Index += sizeof(int);
+
+	memcpy(&Command, &_Data[Index], SizeOfCommand);
+	Index += SizeOfCommand;
+
+	if (strcmp(Command, "AmountOfPlayers") == 0)
+	{
+		int AmountOnSession = 0;
+		memcpy(&AmountOnSession, &_Data[Index], AmountOnSession);
+		Index += AmountOnSession;
+
+		printf("Recieved");
+	}
+
 }

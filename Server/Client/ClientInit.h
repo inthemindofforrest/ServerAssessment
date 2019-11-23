@@ -51,4 +51,8 @@ public:
 	bool SendPacket(const char* _data, int _Size, int _NumData);
 	bool ReceivePacket();
 	bool ClientConsole(char* _Message);
+
+	void DisplayConnection(const char * _data);
+	void ProcessPacket(const char* _Data);
+
 };
