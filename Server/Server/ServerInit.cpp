@@ -116,7 +116,7 @@ bool Server::SetSocketAddress()
 {
 	local_address.sin_family = AF_INET;
 	local_address.sin_port = htons(9999);//Packet needs to be bound to a port. Ports below 1024 are reserved. Chose 9999 - ... just a high number 
-	local_address.sin_addr.s_addr = inet_addr("10.15.20.13");
+	local_address.sin_addr.s_addr = INADDR_ANY;//inet_addr("10.15.20.13");
 
 	printf("Binding Socket to 10.15.20.13:%d\n", local_address.sin_port);
 
@@ -378,7 +378,7 @@ void Server::DisconnectFromSessions(SOCKADDR_IN _Address)
 				_Address.sin_addr.S_un.S_un_b.s_b1, _Address.sin_addr.S_un.S_un_b.s_b2,
 				_Address.sin_addr.S_un.S_un_b.s_b3, _Address.sin_addr.S_un.S_un_b.s_b4,
 				_Address.sin_port, i);
-			SendPacket("Disconnect", 10);
+			//SendPacket("Disconnect", 10);
 			return;
 		}
 	}

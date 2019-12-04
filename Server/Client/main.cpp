@@ -1,16 +1,16 @@
 #include "ClientInit.h"
 #define WIN32_LEAN_AND_MEAN
 #include "raylib.h"
+#include "Player.h"
 
 
 std::thread Client_Thread;
-char * Sessions[];
-
 
 int main()
 {
 	Client NewClient;
-	NewClient.StartClient();
+	NewClient.StartCustomClient("10.15.40.10", 9999);
+	//NewClient.StartClient();
 	
 	Client_Thread = std::thread([&]
 	{
@@ -20,6 +20,8 @@ int main()
 		}
 	});
 	
+	Player P;
+	P.Start();
 
 	int screenWidth = 800;
 	int screenHeight = 450;
@@ -35,6 +37,8 @@ int main()
 
 		ClearBackground(DARKGRAY);
 
+		P.Update();
+
 		RayDrawText("Press 1,2,3,4,5 to join a session!", 0, 0, 20, LIGHTGRAY);
 
 		if (IsKeyPressed(KEY_ONE))	NewClient.SendPacket("Join", 4, 0);
@@ -43,7 +47,8 @@ int main()
 		if (IsKeyPressed(KEY_FOUR))	NewClient.SendPacket("Join", 4, 3);
 		if (IsKeyPressed(KEY_FIVE))	NewClient.SendPacket("Join", 4, 4);
 
-		if (IsKeyPressed(KEY_SPACE))	NewClient.SendPacket("Disconnect", 10, 0);
+		if (IsKeyPressed(KEY_SPACE))	
+			NewClient.SendPacket("Disconnect", 10, 0);
 
 		EndDrawing();
 	}

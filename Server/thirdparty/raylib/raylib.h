@@ -201,7 +201,7 @@ typedef struct Color {
     unsigned char a;
 } Color;
 
-// Rectangle type
+// Rayctangle type
 typedef struct RayRectangle {
     float x;
     float y;

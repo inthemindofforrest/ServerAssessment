@@ -1,3 +1,6 @@
 ﻿  ServerInit.cpp
-c:\users\s189069\source\repos\serverassessment\server\server\serverinit.cpp(367): warning C4172: returning address of local variable or temporary: Total
-  Server.vcxproj -> C:\Users\s189069\source\repos\ServerAssessment\Server\x64\Debug\Server.exe
+  Session.cpp
+  main.cpp
+  Generating Code...
+c:\users\s189069\source\serverassessment\server\server\serverinit.cpp(367): warning C4172: returning address of local variable or temporary: Total
+  Server.vcxproj -> C:\Users\s189069\Source\ServerAssessment\Server\x64\Debug\Server.exe

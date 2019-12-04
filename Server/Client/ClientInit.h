@@ -38,6 +38,7 @@ public:
 	void StartClient();
 	bool StopClient();
 	void StartCustomClient();
+	void StartCustomClient(const char* _IP, int _Port);
 	void UpdateClient();
 
 	bool WSAStart();
@@ -45,6 +46,7 @@ public:
 	void AssignServerSocket();
 	
 	void CustomServerAddress(char* _Address, char* _Port);
+	void CustomServerAddress(const char* _Address, int _Port);
 
 	bool SendPacket();
 	bool SendPacket(const char* _data);

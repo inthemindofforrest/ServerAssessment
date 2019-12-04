@@ -61,6 +61,28 @@ void Client::StartCustomClient()
 
 
 }
+void Client::StartCustomClient(const char* _IP, int _Port)
+{
+	WSAStart();
+
+	CustomServerAddress(_IP, _Port);
+	AssignServerSocket();
+
+	is_running = true;
+	SendPacket("Join");
+
+
+
+	Recieve_Thread = std::thread([&]
+	{
+		while (is_running)
+		{
+			ReceivePacket();
+		}
+	});
+
+
+}
 
 void Client::UpdateClient()
 {
@@ -99,6 +121,12 @@ void Client::CustomServerAddress(char * _Address, char* _Port)
 {
 	server_address.sin_family = AF_INET;
 	server_address.sin_port = htons(atoi(_Port));
+	server_address.sin_addr.S_un.S_addr = inet_addr(_Address);
+}
+void Client::CustomServerAddress(const char * _Address, int _Port)
+{
+	server_address.sin_family = AF_INET;
+	server_address.sin_port = htons(_Port);
 	server_address.sin_addr.S_un.S_addr = inet_addr(_Address);
 }
 

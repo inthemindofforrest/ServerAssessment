@@ -83,3 +83,42 @@ bool Session::CheckForClient(SOCKADDR_IN _Address)
 	}
 	return false;
 }
+
+bool Session::UpdatePosition(SOCKADDR_IN _Address, float _NewX, float _NewY)
+{
+	for (int i = 0; i < CurrentClientAmount; i++)
+	{
+		if (ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b1 == _Address.sin_addr.S_un.S_un_b.s_b1 &&
+			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b2 == _Address.sin_addr.S_un.S_un_b.s_b2 &&
+			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b3 == _Address.sin_addr.S_un.S_un_b.s_b3 &&
+			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b4 == _Address.sin_addr.S_un.S_un_b.s_b4 &&
+			ClientPositions[i].Address.sin_port == _Address.sin_port)
+		{
+			//Update the clients position server side
+			ClientPositions[i].Value[0] = _NewX;
+			ClientPositions[i].Value[1] = _NewY;
+			return true;
+		}
+	}
+	return false;
+}
+
+Positions Session::RetrievePostion(SOCKADDR_IN _Excluding)
+{
+	for (int i = 0; i < CurrentClientAmount; i++)
+	{
+		if (ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b1 == _Excluding.sin_addr.S_un.S_un_b.s_b1 &&
+			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b2 == _Excluding.sin_addr.S_un.S_un_b.s_b2 &&
+			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b3 == _Excluding.sin_addr.S_un.S_un_b.s_b3 &&
+			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b4 == _Excluding.sin_addr.S_un.S_un_b.s_b4 &&
+			ClientPositions[i].Address.sin_port == _Excluding.sin_port)
+		{
+			continue;
+		}
+		else
+		{
+
+		}
+	}
+	return Positions();
+}
