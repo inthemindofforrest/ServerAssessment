@@ -8,7 +8,7 @@
 #pragma warning(disable:4996) 
 
 typedef unsigned int int32;
-typedef char int8;//8 bytes of memory
+typedef char int8;
 
 class Client
 {
@@ -30,6 +30,7 @@ class Client
 	std::atomic<bool> HasSentMessage;
 
 public:
+	bool IsConnected;
 
 	std::thread Recieve_Thread;
 

@@ -9,6 +9,7 @@ void Client::StartClient()
 
 	is_running = true;
 	HasSentMessage = false;
+	IsConnected = false;
 	//printf("Client: %d.%d.%d.%d:%d trying to join Server: %d.%d.%d.%d:%d")
 
 	Recieve_Thread = std::thread([&]
@@ -30,6 +31,7 @@ bool Client::StopClient()
 		return false;
 	}
 	printf("Disconnected from server.\n");
+	IsConnected = false;
 	return true;
 }
 
@@ -244,7 +246,7 @@ bool Client::ReceivePacket()
 
 		ProcessPacket(buffer);
 
-		//Grabe data from packet
+		//Grab data from packet
 		int32 read_index = 0;
 		char Temp[IDENTIFY_BUFFER_SIZE] = { '\0' };
 		memcpy(&RecievedData, &Temp[read_index], sizeof(RecievedData));
@@ -282,6 +284,7 @@ void Client::DisplayConnection(const char * _data)
 			server_address.sin_addr.S_un.S_un_b.s_b3,
 			server_address.sin_addr.S_un.S_un_b.s_b4,
 			server_address.sin_port);
+		IsConnected = true;
 	}
 	if (strcmp(_data, "Disconnect") == 0)
 	{
@@ -291,10 +294,11 @@ void Client::DisplayConnection(const char * _data)
 			server_address.sin_addr.S_un.S_un_b.s_b3,
 			server_address.sin_addr.S_un.S_un_b.s_b4,
 			server_address.sin_port);
+		IsConnected = false;
 	}
 }
 
-void Client::ProcessPacket(const char * _Data)
+void Client::ProcessPacket(const char * _Data)//NEED TO FIX
 {
 	int Index = 0;
 	char Command[IDENTIFY_BUFFER_SIZE] = {'\0'};

@@ -17,6 +17,7 @@ bool Session::AddClientToSession(SOCKADDR_IN _Address)
 		{
 			Clients[i] = _Address;
 			CurrentClientAmount++;
+			ClientPositions[i].Address = _Address;
 			return true;
 		}
 	}
@@ -103,22 +104,43 @@ bool Session::UpdatePosition(SOCKADDR_IN _Address, float _NewX, float _NewY)
 	return false;
 }
 
-Positions Session::RetrievePostion(SOCKADDR_IN _Excluding)
+bool Session::MatchingSockAddress(SOCKADDR_IN _First, SOCKADDR_IN _Second)
 {
-	for (int i = 0; i < CurrentClientAmount; i++)
-	{
-		if (ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b1 == _Excluding.sin_addr.S_un.S_un_b.s_b1 &&
-			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b2 == _Excluding.sin_addr.S_un.S_un_b.s_b2 &&
-			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b3 == _Excluding.sin_addr.S_un.S_un_b.s_b3 &&
-			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b4 == _Excluding.sin_addr.S_un.S_un_b.s_b4 &&
-			ClientPositions[i].Address.sin_port == _Excluding.sin_port)
-		{
-			continue;
-		}
-		else
-		{
+	return(_First.sin_addr.S_un.S_un_b.s_b1 == _Second.sin_addr.S_un.S_un_b.s_b1 &&
+		_First.sin_addr.S_un.S_un_b.s_b2 == _Second.sin_addr.S_un.S_un_b.s_b2 &&
+		_First.sin_addr.S_un.S_un_b.s_b3 == _Second.sin_addr.S_un.S_un_b.s_b3 &&
+		_First.sin_addr.S_un.S_un_b.s_b4 == _Second.sin_addr.S_un.S_un_b.s_b4 &&
+		_First.sin_port == _Second.sin_port);
+}
 
-		}
+std::list<Positions> Session::RetrieveClientPositions()
+{
+	std::list<Positions> ClientPos;
+	for (int i = 0; i < MaxClientAmount; i++)
+	{
+		if (Clients[i].sin_port == 0)
+			continue;
+		ClientPos.push_back(ClientPositions[i]);
 	}
-	return Positions();
+	return ClientPos;
+}
+
+SOCKADDR_IN Session::ClientIP(int _ClientIndex)
+{
+	return Clients[_ClientIndex];
+}
+
+std::list<SOCKADDR_IN> Session::AvailableClientIP()
+{
+	std::list<SOCKADDR_IN> TempList;
+
+	for (int i = 0; i < MaxClientAmount; i++)
+	{
+		SOCKADDR_IN TempAdd = ClientIP(i);
+		if (TempAdd.sin_port == 0)//If Port == 0, Session space is empty
+			continue;
+
+		TempList.push_back(TempAdd);
+	}
+	return TempList;
 }

@@ -149,7 +149,7 @@
 // deprecated raylib implementation of these functions
 #define FormatText  TextFormat
 #define SubText     TextSubtext
-#define ShowWindow  RayUnhideWindow
+#define RayShowWindow  RayUnhideWindow
 
 //----------------------------------------------------------------------------------
 // Structures Definition
@@ -201,7 +201,7 @@ typedef struct Color {
     unsigned char a;
 } Color;
 
-// Rayctangle type
+// Rectangle type
 typedef struct RayRectangle {
     float x;
     float y;

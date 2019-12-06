@@ -1,6 +1,7 @@
 #include "ServerInit.h"
 #include <cstdlib>
 #include <string.h>
+#include <Windows.h>
 
 void Server::Shutdown()
 {
@@ -32,6 +33,15 @@ Server::Server()
 		while (is_running)
 		{
 			ServerConsole();
+		}
+	});
+	SendClientInfo_Thread = std::thread([&] 
+	{
+		while (is_running)
+		{
+			//Only checks for available on Session Index 0
+			std::list<SOCKADDR_IN> AllAddresses = AllAvailableAddresses(0);
+
 		}
 	});
 }
@@ -220,6 +230,13 @@ void Server::CreatePacket()
 	//write_index += sizeof(buffer);
 
 	//memcpy(&buffer[write_index], &is_running, sizeof(is_running));
+}
+
+void Server::CreatePacket(const char * Message)
+{
+	strcpy(SendingData, Message);
+	int32 write_index = 0;
+	memcpy(&buffer[write_index], &SendingData, sizeof(SendingData));
 }
 
 bool Server::SendPacket()
@@ -430,6 +447,20 @@ bool Server::MatchingSockAddress(SOCKADDR_IN _First, SOCKADDR_IN _Second)
 		_First.sin_port == _Second.sin_port);
 }
 
+std::string Server::SockAddrInToString(SOCKADDR_IN _Address)
+{
+	std::string Text;
+	Text.append(std::to_string(_Address.sin_addr.S_un.S_un_b.s_b1));
+	Text.append(".");
+	Text.append(std::to_string(_Address.sin_addr.S_un.S_un_b.s_b2));
+	Text.append(".");
+	Text.append(std::to_string(_Address.sin_addr.S_un.S_un_b.s_b3));
+	Text.append(".");
+	Text.append(std::to_string(_Address.sin_addr.S_un.S_un_b.s_b4));
+
+	return Text;
+}
+
 bool Server::ResetSockAddress(SOCKADDR_IN * _Address)
 {
 	(*_Address).sin_addr.S_un.S_un_b.s_b1 = 0;
@@ -440,5 +471,51 @@ bool Server::ResetSockAddress(SOCKADDR_IN * _Address)
 	return false;
 }
 
+SOCKADDR_IN Server::ClientIPFromSession(int _SessionID, int _ClientIndex)
+{
+	return Sessions[_SessionID].ClientIP(_ClientIndex);
+}
+
+std::list<SOCKADDR_IN> Server::AllAvailableAddresses(int _SessionID)
+{
+	return Sessions[_SessionID].AvailableClientIP();
+}
+
+
+bool Server::SendPositionPacket()
+{
+	//Get all players, and Positions to send packets
+	std::list<SOCKADDR_IN> ClientIPS = Sessions[0].AvailableClientIP();
+	std::list<Positions> ClientPos = Sessions[0].RetrieveClientPositions();
+
+	//Create the packets
+	std::string Message;
+
+	Message.append("ClientPos,");//Command for Client Positions
+
+	//Attach each players positions
+
+	while (ClientPos.size() > 0)
+	{
+		std::string Temp = SockAddrInToString(ClientPos.front().Address).c_str();
+
+		Message.append(Temp + ",");//Adds first IP
+
+		Message.append(std::to_string(ClientPos.front().Value[0]) + ",");
+
+		Message.append(std::to_string(ClientPos.front().Value[1]) + ",");
+		ClientPos.pop_front();
+	}
+	//Send Packets
+
+	while(ClientIPS.size() > 0)
+	{
+		SendPacket(Message.c_str(), (int)sizeof(Message), ClientIPS.front());
+		ClientIPS.pop_front();
+	}
+
+	//SendPacket(Message, Index, Sessions[i].Clients[j]);
+	return true;
+}
 
 

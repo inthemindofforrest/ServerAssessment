@@ -1,5 +1,3 @@
-﻿  Player.cpp
-c:\users\s189069\source\serverassessment\server\client\player.cpp(34): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-c:\users\s189069\source\serverassessment\server\client\player.cpp(39): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\users\s189069\source\serverassessment\server\client\player.cpp(40): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  Client.vcxproj -> C:\Users\s189069\Source\ServerAssessment\Server\x64\Debug\Client.exe
+﻿  ClientInit.cpp
+c:\users\s189069\source\repos\serverassessment\server\client\clientinit.cpp(275): warning C4715: 'Client::ClientConsole': not all control paths return a value
+  Client.vcxproj -> C:\Users\s189069\source\repos\ServerAssessment\Server\x64\Debug\Client.exe

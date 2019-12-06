@@ -1,12 +1,14 @@
 #pragma once
 #include <WinSock2.h>
 #include <stdio.h>
+#include <iostream>
+#include <list>
 
 struct Positions
 {
 public:
 	SOCKADDR_IN Address;
-	float Value[2];
+	int Value[2]{0};
 };
 
 class Session
@@ -31,5 +33,9 @@ public:
 	bool CheckForClient(SOCKADDR_IN _Address);
 	bool UpdatePosition(SOCKADDR_IN _Address, float _NewX, float _NewY);
 
-	Positions RetrievePostion(SOCKADDR_IN _Excluding);
+	static bool MatchingSockAddress(SOCKADDR_IN _First, SOCKADDR_IN _Second);
+
+	std::list<Positions> RetrieveClientPositions();
+	SOCKADDR_IN ClientIP(int _ClientIndex);
+	std::list<SOCKADDR_IN> AvailableClientIP();
 };

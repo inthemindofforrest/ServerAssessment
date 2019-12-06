@@ -5,6 +5,9 @@
 #include"Session.h"
 #include<thread>
 #include<atomic>
+#include <iostream>
+#include <list>
+
 
 #pragma warning(disable:4996) 
 
@@ -34,6 +37,7 @@ class Server
 	void Shutdown();
 
 public:
+	std::thread SendClientInfo_Thread;
 	std::thread Console_Thread;
 	std::atomic<bool> is_running;
 
@@ -56,6 +60,7 @@ public:
 	void ProccessPacket();
 
 	void CreatePacket();
+	void CreatePacket(const char* Message);
 	bool SendPacket();
 	bool SendPacket(const char* _Message, int _Size);
 	bool SendPacket(const char* _Message, int _Size, SOCKADDR_IN _Return);
@@ -70,5 +75,14 @@ public:
 	void ServerConsole();
 
 	static bool MatchingSockAddress(SOCKADDR_IN _First, SOCKADDR_IN _Second);
+	static std::string SockAddrInToString(SOCKADDR_IN _Address);
 	static bool ResetSockAddress(SOCKADDR_IN* _Address);
+
+	SOCKADDR_IN ClientIPFromSession(int _SessionID, int _ClientIndex);
+	std::list<SOCKADDR_IN> AllAvailableAddresses(int _SessionID);
+
+
+
+	//Game Specific
+	bool SendPositionPacket();//Sends all positions to players in the session
 };

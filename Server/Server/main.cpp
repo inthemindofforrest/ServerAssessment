@@ -1,26 +1,45 @@
 #include "ServerInit.h"
 #include "Session.h"
+#include "ThreadManager.h"
 #define WIN32_LEAN_AND_MEAN
 #include "raylib.h"
 #include<thread>
+#include <stdio.h>
 
+#include <iostream>
+#include <list>
 
 
 std::thread Server_Thread;
 
+Server* ServerPointer;
+void ServerUpdate()
+{
+	ServerPointer->ServerUpdate();
+}
+
 
 int main()
 {
+	bool ShowWindowBool = false;
+	ShowWindow(GetConsoleWindow(), SW_HIDE);//Hides the console window
+
 	Server NewServer;
 	NewServer.StartServer();
 
-	Server_Thread = std::thread([&]
+	ServerPointer = &NewServer;
+	RunThreadWithLoop(&Server_Thread, ServerUpdate);
+
+	/*Server_Thread = std::thread([&]
 	{
 		while (true)
 		{
 			NewServer.ServerUpdate();
 		}
-	});
+	});*/
+
+#pragma region Visuals
+
 
 
 	int screenWidth = 250;
@@ -42,16 +61,39 @@ int main()
 		{
 			Temp.append("Session(" + std::to_string(i) + "): " + std::to_string(NewServer.GetSessionCount()[i]) + "\n");
 		}
-
-
 		std::string Text = ("Server: \n" + Temp);
-
 		RayDrawText(Text.c_str(), 0, 0, 20, LIGHTGRAY);
 
+
+		if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C))
+		{
+			if (ShowWindowBool)
+			{
+				ShowWindow(GetConsoleWindow(), SW_HIDE);// HIdes the console window
+				ShowWindowBool = false;
+			}
+			else
+			{
+				system("CLS");
+				ShowWindow(GetConsoleWindow(), SW_SHOW);// HIdes the console window
+				ShowWindowBool = true;
+				printf("Console Visibility = true\n");
+			}
+		}
+
+		if (IsKeyPressed(KEY_P))
+		{
+			std::list<SOCKADDR_IN> Temp = NewServer.AllAvailableAddresses(0);
+			NewServer.SendPositionPacket();
+			//NewServer.SendPacket("Hi", sizeof("Hi"), NewServer.ClientIPFromSession(0, 0));
+		}
 		EndDrawing();
 	}
 
 	RayCloseWindow();
+#pragma endregion
+
+	//if (Server_Thread.joinable()) Server_Thread.join();
 
 	return 0;
 }

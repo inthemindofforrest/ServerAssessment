@@ -129,11 +129,13 @@
     <ClCompile Include="ServerCommands.cpp" />
     <ClCompile Include="ServerInit.cpp" />
     <ClCompile Include="Session.cpp" />
+    <ClCompile Include="ThreadManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ServerCommands.h" />
     <ClInclude Include="ServerInit.h" />
     <ClInclude Include="Session.h" />
+    <ClInclude Include="ThreadManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
