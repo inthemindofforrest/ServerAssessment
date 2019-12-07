@@ -26,6 +26,8 @@ int main()
 	Player P;
 	P.Start();
 
+#pragma region Visuals
+
 	int screenWidth = 800;
 	int screenHeight = 450;
 
@@ -40,9 +42,13 @@ int main()
 
 		ClearBackground(DARKGRAY);
 
-		P.Update();
+		P.Update(&NewClient);
 
-		if (IsKeyPressed(KEY_SPACE)) NewClient.SendPacket("Disconnect", 10, 0);
+		if (IsKeyPressed(KEY_BACKSPACE))
+		{
+			NewClient.SendPacket("Disconnect", 10, 0);
+			NewClient.IsConnected = false;
+		}
 		if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C))
 		{
 			if (ShowWindowBool)
@@ -62,19 +68,21 @@ int main()
 		if (!NewClient.IsConnected)
 		{
 			ClearBackground(DARKGRAY);
-			int Temp = MeasureText("Press 1,2,3,4,5 to join a session!", 20) / 2;
-			RayDrawText("Press 1,2,3,4,5 to join a session!", (GetScreenWidth() / 2) - Temp, GetScreenHeight() / 2, 20, LIGHTGRAY);
-
-			if (IsKeyPressed(KEY_ONE))	NewClient.SendPacket("Join", 4, 0);
-			if (IsKeyPressed(KEY_TWO))	NewClient.SendPacket("Join", 4, 1);
-			if (IsKeyPressed(KEY_THREE))NewClient.SendPacket("Join", 4, 2);
-			if (IsKeyPressed(KEY_FOUR))	NewClient.SendPacket("Join", 4, 3);
-			if (IsKeyPressed(KEY_FIVE))	NewClient.SendPacket("Join", 4, 4);
+			int Temp = MeasureText("Press Space to join a session!", 20) / 2;
+			RayDrawText("Press Space to join a session!", (GetScreenWidth() / 2) - Temp, GetScreenHeight() / 2, 20, LIGHTGRAY);
+			RayDrawText(std::to_string(GetFrameTime() * 60 * 60).c_str(), (GetScreenWidth() / 2), 0, 20, LIGHTGRAY);
+			if (IsKeyPressed(KEY_SPACE))
+			{
+				NewClient.SendPacket("Join");
+				NewClient.IsConnected = true;
+			}
 		}
 		EndDrawing();
 	}
  
-	RayCloseWindow();        
+	RayCloseWindow(); 
+#pragma endregion
 	
+	NewClient.CloseAllThreads();
 	return 0;
 }

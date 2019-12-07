@@ -39,9 +39,8 @@ Server::Server()
 	{
 		while (is_running)
 		{
-			//Only checks for available on Session Index 0
-			std::list<SOCKADDR_IN> AllAddresses = AllAvailableAddresses(0);
-
+			SendPositionPacket();
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
 		}
 	});
 }
@@ -193,31 +192,33 @@ bool Server::RecievedPacket()
 void Server::ProccessPacket()
 {
 	//Process of the PACKETS
-	int32 read_index = 0;
+	std::string CopiedData = buffer;
+	std::string Command;
 
-	char Command[IDENTIFY_BUFFER_SIZE] = {'\0'};
-	int Size;
-	int SessionID;
-
-	memcpy(&SessionID, &buffer[read_index], sizeof(SessionID));
-	read_index += sizeof(SessionID);
-	
-	memcpy(&Size, &buffer[read_index], sizeof(Size));
-	read_index += sizeof(Size);
-
-	memcpy(&Command, &buffer[read_index], Size);
-	read_index += Size;
+	Command = ParsePacket(&CopiedData);
 
 	
 
-	if (strcmp(Command, "Join") == 0)
+	if (Command.compare("Join") == 0)
 	{
-		printf("Player requested to Join Session: %d\n", SessionID);
-		CheckForSession(from, SessionID);
+		CheckForSession(from);
 	}
- 	else if (strcmp(Command, "Disconnect") == 0)
+ 	else if (Command.compare("Disconnect") == 0)
 	{
 		DisconnectFromSessions(from);
+	}
+	else if (Command.compare("PlayerPos") == 0)
+	{
+		int x = std::stoi(ParsePacket(&CopiedData));
+		int y = std::stoi(ParsePacket(&CopiedData));
+
+		for (int i = 0; i < SessionsAmount; i++)
+		{
+			if (Sessions[i].CheckForClient(from))
+			{
+				Sessions[i].UpdatePosition(from, x, y);
+			}
+		}
 	}
 }
 
@@ -484,38 +485,64 @@ std::list<SOCKADDR_IN> Server::AllAvailableAddresses(int _SessionID)
 
 bool Server::SendPositionPacket()
 {
-	//Get all players, and Positions to send packets
-	std::list<SOCKADDR_IN> ClientIPS = Sessions[0].AvailableClientIP();
-	std::list<Positions> ClientPos = Sessions[0].RetrieveClientPositions();
+	for (int i = 0; i < SessionsAmount; i++)
+	{
+		//Get all players, and Positions to send packets
+		std::list<SOCKADDR_IN> ClientIPS = Sessions[i].AvailableClientIP();
+		std::list<Positions> ClientPos = Sessions[i].RetrieveClientPositions();
 
-	//Create the packets
-	std::string Message;
+		//Create the packets
+		std::string Message;
 
-	Message.append("ClientPos,");//Command for Client Positions
-
+		Message.append("ClientPos,");//Command for Client Positions
 	//Attach each players positions
 
-	while (ClientPos.size() > 0)
-	{
-		std::string Temp = SockAddrInToString(ClientPos.front().Address).c_str();
+		while (ClientPos.size() > 0)
+		{
+			Message.append(SockAddrInToString(ClientPos.front().Address).c_str());
+			Message.append(",");
 
-		Message.append(Temp + ",");//Adds first IP
+			//X Position
+			Message.append(std::to_string(ClientPos.front().Value[0]) + ",");
+			//Y Position
+			Message.append(std::to_string(ClientPos.front().Value[1]) + ";");
+			ClientPos.pop_front();
+		}
 
-		Message.append(std::to_string(ClientPos.front().Value[0]) + ",");
-
-		Message.append(std::to_string(ClientPos.front().Value[1]) + ",");
-		ClientPos.pop_front();
+		//Send Packets
+		while (ClientIPS.size() > 0)
+		{
+			SendPacket(Message.c_str(), Message.size(), ClientIPS.front());
+			ClientIPS.pop_front();
+		}
 	}
-	//Send Packets
-
-	while(ClientIPS.size() > 0)
-	{
-		SendPacket(Message.c_str(), (int)sizeof(Message), ClientIPS.front());
-		ClientIPS.pop_front();
-	}
-
-	//SendPacket(Message, Index, Sessions[i].Clients[j]);
 	return true;
 }
 
+std::string Server::ParsePacket(std::string* _Packet)
+{
+	std::string Parsed;
 
+	while ((*_Packet)[0] != ',' && (*_Packet)[0] != ';' && (*_Packet)[0] != '\0')
+	{
+		Parsed += (*_Packet)[0];
+		(*_Packet).erase(0, 1);
+	}
+
+	if ((*_Packet)[0] == ',' || (*_Packet)[0] == ';')
+		(*_Packet).erase(0, 1);
+
+	return Parsed;
+}
+
+void Server::CloseAllThreads()
+{
+	if (SendClientInfo_Thread.joinable())
+	{
+		SendClientInfo_Thread.join();
+	}
+	if (Console_Thread.joinable())
+	{
+		Console_Thread.join();
+	}
+}

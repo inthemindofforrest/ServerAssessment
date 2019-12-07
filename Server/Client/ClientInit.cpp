@@ -1,5 +1,13 @@
 #include "ClientInit.h"
 #include <cstdlib>
+#include <string>
+
+
+Client::Client()
+{
+	winsock_version = 0x202;//Which version of Winsock we are using
+	winsock_data;//Struct of data
+}
 
 void Client::StartClient()
 {
@@ -18,6 +26,7 @@ void Client::StartClient()
 		{
 			ReceivePacket();
 		}
+		printf("Q");
 	});
 }
 
@@ -96,9 +105,10 @@ void Client::UpdateClient()
 
 bool Client::WSAStart()
 {
-	if (WSAStartup(winsock_version, &winsock_data))//Return 0 if successful
+	int Temp = WSAStartup(winsock_version, &winsock_data);
+	if (Temp)//Return 0 if successful
 	{
-		printf("WSAStartup failed: %d on line: %d", WSAGetLastError(), __LINE__);
+		printf("WSAStartup failed: %d on line: %d, Returned: %d", WSAGetLastError(), __LINE__, Temp);
 		return false;
 	}
 	return true;
@@ -194,13 +204,7 @@ bool Client::SendPacket(const char * _data, int _Size, int _NumData)
 	if (is_running)
 	{
 		int Index = 0;
-		char temp[IDENTIFY_BUFFER_SIZE];
-
-		memcpy(&temp[Index], &_NumData, sizeof(_NumData));
-		Index += sizeof(_NumData);
-		
-		memcpy(&temp[Index], &_Size, sizeof(_Size));
-		Index += sizeof(_Size);
+		char temp[IDENTIFY_BUFFER_SIZE]{'\0'};
 
 		memcpy(&temp[Index], _data, _Size);
 		Index += _Size;
@@ -236,21 +240,14 @@ bool Client::ReceivePacket()
 		flags = 0;
 		from_size = sizeof(from);
 
-		bytes_received = recvfrom(sock, buffer, IDENTIFY_BUFFER_SIZE, flags, (SOCKADDR*)&from, &from_size);
+		bytes_received = recvfrom(sock, buffer, 1024, flags, (SOCKADDR*)&from, &from_size);
 
 		if (bytes_received == SOCKET_ERROR)
 		{
 			printf("recvfrom returned SOCKET_ERROR, WSAGetLastError() %d on line: %d\n", WSAGetLastError(), __LINE__);
 			return false;
 		}
-
 		ProcessPacket(buffer);
-
-		//Grab data from packet
-		int32 read_index = 0;
-		char Temp[IDENTIFY_BUFFER_SIZE] = { '\0' };
-		memcpy(&RecievedData, &Temp[read_index], sizeof(RecievedData));
-		read_index += sizeof(RecievedData);
 	}
 	return true;
 }
@@ -298,25 +295,64 @@ void Client::DisplayConnection(const char * _data)
 	}
 }
 
-void Client::ProcessPacket(const char * _Data)//NEED TO FIX
+void Client::ProcessPacket(char * _Data)//NEED TO FIX
 {
-	int Index = 0;
-	char Command[IDENTIFY_BUFFER_SIZE] = {'\0'};
+	std::string DataCopy = _Data;
+	std::string Command;
 	int SizeOfCommand;
+	ClearArray(buffer, IDENTIFY_BUFFER_SIZE);
 
-	memcpy(&SizeOfCommand, &_Data[Index], sizeof(int));
-	Index += sizeof(int);
+	Command = ParsePacket(&DataCopy);
 
-	memcpy(&Command, &_Data[Index], SizeOfCommand);
-	Index += SizeOfCommand;
-
-	if (strcmp(Command, "AmountOfPlayers") == 0)
+	if (Command.compare("AmountOfPlayers") == 0)
 	{
-		int AmountOnSession = 0;
-		memcpy(&AmountOnSession, &_Data[Index], AmountOnSession);
-		Index += AmountOnSession;
-
 		printf("Recieved");
 	}
+	else if (Command.compare("ClientPos") == 0)
+	{
+		IsDrawing.lock();
+		AllClientPositions.clear();
+		while (DataCopy[0] != '\0')
+		{
+			Positions TempClient;
+			TempClient.Address.sin_addr.S_un.S_addr = inet_addr(ParsePacket(&DataCopy).c_str());
+			TempClient.Value[0] = std::stoi(ParsePacket(&DataCopy).c_str());
+			TempClient.Value[1] = std::stoi(ParsePacket(&DataCopy).c_str());
+			AllClientPositions.push_back(TempClient);
+		}
+		IsDrawing.unlock();
+		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+}
 
+void Client::CloseAllThreads()
+{
+	if (Recieve_Thread.joinable())
+	{
+		Recieve_Thread.join();
+	}
+}
+
+std::string Client::ParsePacket(std::string* _Packet)
+{
+	std::string Parsed;
+
+	while ((*_Packet)[0] != ',' && (*_Packet)[0] != ';' && (*_Packet)[0] != '\0')
+	{
+		Parsed += (*_Packet)[0];
+		(*_Packet).erase(0, 1);
+	}
+
+	if ((*_Packet)[0] == ',' || (*_Packet)[0] == ';')
+		(*_Packet).erase(0, 1);
+
+	return Parsed;
+}
+
+void Client::ClearArray(char * _Array, int _Size)
+{
+	for (int i = 0; i < _Size; i++)
+	{
+		_Array[i] = '\0';
+	}
 }

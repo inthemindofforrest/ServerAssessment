@@ -4,11 +4,23 @@
 #include <string>
 #include<thread>
 #include <atomic>
+#include <mutex>
+#include <iostream>
+#include <list>
 
 #pragma warning(disable:4996) 
 
 typedef unsigned int int32;
 typedef char int8;
+
+
+struct Positions
+{
+public:
+	SOCKADDR_IN Address;
+	int Value[2]{ 0 };
+};
+
 
 class Client
 {
@@ -30,11 +42,15 @@ class Client
 	std::atomic<bool> HasSentMessage;
 
 public:
+	Client();
+
+	std::list<Positions> AllClientPositions;
 	bool IsConnected;
 
 	std::thread Recieve_Thread;
 
 	std::atomic<bool> is_running;
+	std::mutex IsDrawing;
 
 	void StartClient();
 	bool StopClient();
@@ -56,6 +72,13 @@ public:
 	bool ClientConsole(char* _Message);
 
 	void DisplayConnection(const char * _data);
-	void ProcessPacket(const char* _Data);
+	void ProcessPacket(char* _Data);
+
+	void CloseAllThreads();
+
+
+	std::string ParsePacket(std::string* _Packet);//Should change Packet
+
+	void ClearArray(char* _Array, int _Size);
 
 };

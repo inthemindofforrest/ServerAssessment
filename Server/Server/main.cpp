@@ -5,7 +5,6 @@
 #include "raylib.h"
 #include<thread>
 #include <stdio.h>
-
 #include <iostream>
 #include <list>
 
@@ -30,20 +29,15 @@ int main()
 	ServerPointer = &NewServer;
 	RunThreadWithLoop(&Server_Thread, ServerUpdate);
 
-	/*Server_Thread = std::thread([&]
-	{
-		while (true)
-		{
-			NewServer.ServerUpdate();
-		}
-	});*/
 
 #pragma region Visuals
 
 
 
-	int screenWidth = 250;
-	int screenHeight = 200;
+	//int screenWidth = 250;
+	//int screenHeight = 200;
+	int screenWidth = 800;
+	int screenHeight = 450;
 
 	InitWindow(screenWidth, screenHeight, "treelib - Server");
 
@@ -80,20 +74,17 @@ int main()
 				printf("Console Visibility = true\n");
 			}
 		}
-
-		if (IsKeyPressed(KEY_P))
+		std::list<Positions> Pos = NewServer.Sessions[0].RetrieveClientPositions();
+		for (std::list<Positions>::iterator i = Pos.begin();
+			i != Pos.end(); i++)
 		{
-			std::list<SOCKADDR_IN> Temp = NewServer.AllAvailableAddresses(0);
-			NewServer.SendPositionPacket();
-			//NewServer.SendPacket("Hi", sizeof("Hi"), NewServer.ClientIPFromSession(0, 0));
+			DrawRectangle((*i).Value[0], (*i).Value[1], 50, 50, RED);
 		}
 		EndDrawing();
 	}
 
 	RayCloseWindow();
 #pragma endregion
-
-	//if (Server_Thread.joinable()) Server_Thread.join();
-
+	NewServer.CloseAllThreads();
 	return 0;
 }

@@ -29,7 +29,7 @@ class Server
 #pragma endregion
 
 	static const int SessionsAmount = 5;
-	Session Sessions[SessionsAmount];
+	
 
 
 	char SendingData[IDENTIFY_BUFFER_SIZE];
@@ -37,6 +37,9 @@ class Server
 	void Shutdown();
 
 public:
+Session Sessions[SessionsAmount];
+	bool Testing = false;
+
 	std::thread SendClientInfo_Thread;
 	std::thread Console_Thread;
 	std::atomic<bool> is_running;
@@ -81,7 +84,9 @@ public:
 	SOCKADDR_IN ClientIPFromSession(int _SessionID, int _ClientIndex);
 	std::list<SOCKADDR_IN> AllAvailableAddresses(int _SessionID);
 
+	std::string ParsePacket(std::string* _Packet);
 
+	void CloseAllThreads();
 
 	//Game Specific
 	bool SendPositionPacket();//Sends all positions to players in the session
