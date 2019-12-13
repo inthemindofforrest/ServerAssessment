@@ -9,6 +9,7 @@ struct Positions
 public:
 	SOCKADDR_IN Address;
 	int Value[2]{0};
+	int Color;
 };
 
 class Session
@@ -32,6 +33,7 @@ public:
 
 	bool CheckForClient(SOCKADDR_IN _Address);
 	bool UpdatePosition(SOCKADDR_IN _Address, float _NewX, float _NewY);
+	bool UpdateColor(SOCKADDR_IN _Address, int _Color);
 
 	static bool MatchingSockAddress(SOCKADDR_IN _First, SOCKADDR_IN _Second);
 

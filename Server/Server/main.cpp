@@ -50,6 +50,16 @@ int main()
 
 		ClearBackground(BLACK);
 
+		for (int j = 0; j < NewServer.SessionsAmount; j++)
+		{
+			std::list<Positions> Pos = NewServer.Sessions[j].RetrieveClientPositions();
+			for (std::list<Positions>::iterator i = Pos.begin();
+				i != Pos.end(); i++)
+			{
+				DrawRectangle((*i).Value[0], (*i).Value[1], 50, 50, RED);
+			}
+		}
+
 		std::string Temp;
 		for (int i = 0; i < 5; i++)
 		{
@@ -73,12 +83,6 @@ int main()
 				ShowWindowBool = true;
 				printf("Console Visibility = true\n");
 			}
-		}
-		std::list<Positions> Pos = NewServer.Sessions[0].RetrieveClientPositions();
-		for (std::list<Positions>::iterator i = Pos.begin();
-			i != Pos.end(); i++)
-		{
-			DrawRectangle((*i).Value[0], (*i).Value[1], 50, 50, RED);
 		}
 		EndDrawing();
 	}

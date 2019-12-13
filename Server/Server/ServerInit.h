@@ -27,16 +27,12 @@ class Server
 	int from_size;
 	int bytes_recieved;
 #pragma endregion
-
-	static const int SessionsAmount = 5;
-	
-
-
 	char SendingData[IDENTIFY_BUFFER_SIZE];
 	
 	void Shutdown();
 
 public:
+	static const int SessionsAmount = 5;
 Session Sessions[SessionsAmount];
 	bool Testing = false;
 

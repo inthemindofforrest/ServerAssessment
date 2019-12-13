@@ -20,7 +20,7 @@ void Client::StartClient()
 	IsConnected = false;
 	//printf("Client: %d.%d.%d.%d:%d trying to join Server: %d.%d.%d.%d:%d")
 
-	Recieve_Thread = std::thread([&]
+	Receive_Thread = std::thread([&]
 	{
 		while (is_running)
 		{
@@ -62,7 +62,7 @@ void Client::StartCustomClient()
 
 
 
-	Recieve_Thread = std::thread([&]
+	Receive_Thread = std::thread([&]
 	{
 		while (is_running)
 		{
@@ -84,7 +84,7 @@ void Client::StartCustomClient(const char* _IP, int _Port)
 
 
 
-	Recieve_Thread = std::thread([&]
+	Receive_Thread = std::thread([&]
 	{
 		while (is_running)
 		{
@@ -271,6 +271,14 @@ bool Client::ClientConsole(char * _Message)
 	}
 }
 
+bool Client::CompareAddresses(SOCKADDR_IN _First, SOCKADDR_IN _Second)
+{
+	return (_First.sin_addr.S_un.S_un_b.s_b1 == _Second.sin_addr.S_un.S_un_b.s_b2 &&
+		_First.sin_addr.S_un.S_un_b.s_b2 == _Second.sin_addr.S_un.S_un_b.s_b2 &&
+		_First.sin_addr.S_un.S_un_b.s_b3 == _Second.sin_addr.S_un.S_un_b.s_b3 &&
+		_First.sin_addr.S_un.S_un_b.s_b4 == _Second.sin_addr.S_un.S_un_b.s_b4);
+}
+
 void Client::DisplayConnection(const char * _data)
 {
 	if (strcmp(_data, "Join") == 0)
@@ -311,15 +319,7 @@ void Client::ProcessPacket(char * _Data)//NEED TO FIX
 	else if (Command.compare("ClientPos") == 0)
 	{
 		IsDrawing.lock();
-		AllClientPositions.clear();
-		while (DataCopy[0] != '\0')
-		{
-			Positions TempClient;
-			TempClient.Address.sin_addr.S_un.S_addr = inet_addr(ParsePacket(&DataCopy).c_str());
-			TempClient.Value[0] = std::stoi(ParsePacket(&DataCopy).c_str());
-			TempClient.Value[1] = std::stoi(ParsePacket(&DataCopy).c_str());
-			AllClientPositions.push_back(TempClient);
-		}
+		SortThroughUpdatingClients(DataCopy);
 		IsDrawing.unlock();
 		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
@@ -327,9 +327,9 @@ void Client::ProcessPacket(char * _Data)//NEED TO FIX
 
 void Client::CloseAllThreads()
 {
-	if (Recieve_Thread.joinable())
+	if (Receive_Thread.joinable())
 	{
-		Recieve_Thread.join();
+		Receive_Thread.join();
 	}
 }
 
@@ -354,5 +354,20 @@ void Client::ClearArray(char * _Array, int _Size)
 	for (int i = 0; i < _Size; i++)
 	{
 		_Array[i] = '\0';
+	}
+}
+
+void Client::SortThroughUpdatingClients(std::string _CopiedString)
+{
+	
+	AllClientPositions.clear();
+	while (_CopiedString[0] != '\0')
+	{
+		Positions TempClient;
+		TempClient.Address.sin_addr.S_un.S_addr = inet_addr(ParsePacket(&_CopiedString).c_str());
+		TempClient.Value[0] = std::stoi(ParsePacket(&_CopiedString).c_str());
+		TempClient.Value[1] = std::stoi(ParsePacket(&_CopiedString).c_str());
+		TempClient.Color = std::stoi(ParsePacket(&_CopiedString).c_str());
+		AllClientPositions.push_back(TempClient);
 	}
 }

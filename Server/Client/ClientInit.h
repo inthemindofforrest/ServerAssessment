@@ -19,6 +19,8 @@ struct Positions
 public:
 	SOCKADDR_IN Address;
 	int Value[2]{ 0 };
+	int Color;
+	bool Active;
 };
 
 
@@ -47,7 +49,7 @@ public:
 	std::list<Positions> AllClientPositions;
 	bool IsConnected;
 
-	std::thread Recieve_Thread;
+	std::thread Receive_Thread;
 
 	std::atomic<bool> is_running;
 	std::mutex IsDrawing;
@@ -71,6 +73,8 @@ public:
 	bool ReceivePacket();
 	bool ClientConsole(char* _Message);
 
+	bool CompareAddresses(SOCKADDR_IN _First, SOCKADDR_IN _Second);
+
 	void DisplayConnection(const char * _data);
 	void ProcessPacket(char* _Data);
 
@@ -80,5 +84,8 @@ public:
 	std::string ParsePacket(std::string* _Packet);//Should change Packet
 
 	void ClearArray(char* _Array, int _Size);
+
+	void SortThroughUpdatingClients(std::string _CopiedString);
+
 
 };

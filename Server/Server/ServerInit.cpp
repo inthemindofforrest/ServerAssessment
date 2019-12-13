@@ -40,7 +40,7 @@ Server::Server()
 		while (is_running)
 		{
 			SendPositionPacket();
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			std::this_thread::sleep_for(std::chrono::milliseconds(16));
 		}
 	});
 }
@@ -217,6 +217,16 @@ void Server::ProccessPacket()
 			if (Sessions[i].CheckForClient(from))
 			{
 				Sessions[i].UpdatePosition(from, x, y);
+			}
+		}
+	}
+	else if (Command.compare("PlayerColor") == 0)
+	{
+		for (int i = 0; i < SessionsAmount; i++)
+		{
+			if (Sessions[i].CheckForClient(from))
+			{
+				Sessions[i].UpdateColor(from, std::stoi(ParsePacket(&CopiedData)));
 			}
 		}
 	}
@@ -505,7 +515,9 @@ bool Server::SendPositionPacket()
 			//X Position
 			Message.append(std::to_string(ClientPos.front().Value[0]) + ",");
 			//Y Position
-			Message.append(std::to_string(ClientPos.front().Value[1]) + ";");
+			Message.append(std::to_string(ClientPos.front().Value[1]) + ",");
+			//Color
+			Message.append(std::to_string(ClientPos.front().Color) + ";");
 			ClientPos.pop_front();
 		}
 

@@ -1,2 +1,15 @@
+:::TODO:::
+
+Get all the Client Positions
+
+If CLient is missing, Mark it as not active
+If not active client is missing again, Remove it from the list !!!IMPORTANT!!!
 
 
+SERVER
+--Holder for bullets, keep track of their positions
+--Holder for astroids, keep track of their positions
+--Track collisions between Bullets and Astroids
+
+CLIENT
+--Draw Astroids and Bullets

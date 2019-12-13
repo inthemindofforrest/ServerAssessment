@@ -128,12 +128,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ClientInit.cpp" />
+    <ClCompile Include="ClientWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Selection.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientInit.h" />
+    <ClInclude Include="ClientWindow.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Selection.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="RecievingCommands.txt" />

@@ -104,6 +104,24 @@ bool Session::UpdatePosition(SOCKADDR_IN _Address, float _NewX, float _NewY)
 	return false;
 }
 
+bool Session::UpdateColor(SOCKADDR_IN _Address, int _Color)
+{
+	for (int i = 0; i < CurrentClientAmount; i++)
+	{
+		if (ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b1 == _Address.sin_addr.S_un.S_un_b.s_b1 &&
+			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b2 == _Address.sin_addr.S_un.S_un_b.s_b2 &&
+			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b3 == _Address.sin_addr.S_un.S_un_b.s_b3 &&
+			ClientPositions[i].Address.sin_addr.S_un.S_un_b.s_b4 == _Address.sin_addr.S_un.S_un_b.s_b4 &&
+			ClientPositions[i].Address.sin_port == _Address.sin_port)
+		{
+			//Update the clients position server side
+			ClientPositions[i].Color = _Color;
+			return true;
+		}
+	}
+	return false;
+}
+
 bool Session::MatchingSockAddress(SOCKADDR_IN _First, SOCKADDR_IN _Second)
 {
 	return(_First.sin_addr.S_un.S_un_b.s_b1 == _Second.sin_addr.S_un.S_un_b.s_b1 &&
