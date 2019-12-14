@@ -13,7 +13,10 @@ ClientSelection Selection;
 void PlayerUpdate(Client* _Client, Player* _Player)
 {
 	PlayerPointer->Update(_Client, _Player);
-	Selection.Update(PlayerPointer);
+	if (!(*_Client).IsConnected)
+	{
+		Selection.Update(PlayerPointer);
+	}
 }
 
 int main()
@@ -41,7 +44,9 @@ int main()
 	});
 
 	NewWindow.Update(PlayerUpdate, &NewClient, PlayerPointer);
- 
+
+	NewClient.ForceSendPacket("Disconnect", 10, 0);
+	NewClient.IsConnected = false;
 	NewClient.CloseAllThreads();
 	Join = true;
 	if (Client_Thread.joinable())
@@ -49,10 +54,10 @@ int main()
 		//Client_Thread.join();
 		Client_Thread.detach();
 	}
+
+	system("CLS");
 	ShowWindow(GetConsoleWindow(), SW_SHOW);// Show the console window
-
-	NewClient.SendPacket("Disconnect", 10, 0);
-	NewClient.IsConnected = false;
-
+	printf("Window forced to a close.\n");
+	system("PAUSE");
 	return 0;
 }

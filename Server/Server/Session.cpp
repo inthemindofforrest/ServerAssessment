@@ -1,11 +1,51 @@
 #include "Session.h"
 #pragma warning(disable:4996) 
+
+
+Positions::Positions(){}
+Positions::Positions(int _X, int _Y, int _Color)
+{
+	Value[0] = _X;
+	Value[1] = _Y;
+	Color = _Color;
+}
+bool Positions::operator==(const Positions _Other)
+{
+	return
+		(Address.sin_addr.S_un.S_un_b.s_b1 == _Other.Address.sin_addr.S_un.S_un_b.s_b1 &&
+			Address.sin_addr.S_un.S_un_b.s_b2 == _Other.Address.sin_addr.S_un.S_un_b.s_b2 &&
+			Address.sin_addr.S_un.S_un_b.s_b3 == _Other.Address.sin_addr.S_un.S_un_b.s_b3 &&
+			Address.sin_addr.S_un.S_un_b.s_b4 == _Other.Address.sin_addr.S_un.S_un_b.s_b4 &&
+			Address.sin_port == _Other.Address.sin_port) &&
+		(Color == _Other.Color) &&
+		(Value[0] == _Other.Value[0] && Value[1] == _Other.Value[1]);
+}
+
 Session::Session()
 {
 	for (int i = 0; i < MaxClientAmount; i++)
 	{
 		Clients[i].sin_addr.S_un.S_addr = inet_addr("0.0.0.0");
 		Clients[i].sin_port = htons(0);
+	}
+}
+
+void Session::SessionUpdate()
+{
+	for (std::list<Positions>::iterator i = Astroids.begin();
+		i != Astroids.end();)
+	{
+		i->Value[0]--;
+		for (std::list<Positions>::iterator j = Bullets.begin();
+			j != Bullets.end(); j++)
+			if (CheckCollisionRecs(RayRectangle(i->Value[0], i->Value[1], 50, 50),
+				RayRectangle(j->Value[0], j->Value[1], 20, 5)))
+			{
+				i = Astroids.erase(i);
+				break;
+			}
+		i++;
+		DrawRectangle(i->Value[0], i->Value[1], 50, 50, WHITE);
 	}
 }
 
@@ -161,4 +201,32 @@ std::list<SOCKADDR_IN> Session::AvailableClientIP()
 		TempList.push_back(TempAdd);
 	}
 	return TempList;
+}
+
+bool Session::CreateBullet(std::string _Data, SOCKADDR_IN _Address)
+{
+	Positions Bullet;
+	Bullet.Value[0] = std::stoi(ParsePacket(&_Data));
+	Bullet.Value[1] = std::stoi(ParsePacket(&_Data));
+	Bullet.Color = std::stoi(ParsePacket(&_Data));
+	Bullet.Address = _Address;
+	Bullets.push_back(Bullet);
+
+	return true;
+}
+
+std::string Session::ParsePacket(std::string* _Packet)
+{
+	std::string Parsed;
+
+	while ((*_Packet)[0] != ',' && (*_Packet)[0] != ';' && (*_Packet)[0] != '\0')
+	{
+		Parsed += (*_Packet)[0];
+		(*_Packet).erase(0, 1);
+	}
+
+	if ((*_Packet)[0] == ',' || (*_Packet)[0] == ';')
+		(*_Packet).erase(0, 1);
+
+	return Parsed;
 }

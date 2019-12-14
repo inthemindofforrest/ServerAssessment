@@ -1,7 +1,10 @@
-﻿  ServerInit.cpp
-c:\users\s189069\source\repos\serverassessment\server\server\serverinit.cpp(219): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-c:\users\s189069\source\repos\serverassessment\server\server\serverinit.cpp(527): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  main.cpp
-  Generating Code...
-c:\users\s189069\source\repos\serverassessment\server\server\serverinit.cpp(395): warning C4172: returning address of local variable or temporary: Total
+﻿  Session.cpp
+c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(1087): warning C4190: 'GetCollisionRec' has C-linkage specified, but returns UDT 'RayRectangle' which is incompatible with C
+  c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(205): note: see declaration of 'RayRectangle'
+c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(1112): warning C4190: 'GetImageAlphaBorder' has C-linkage specified, but returns UDT 'RayRectangle' which is incompatible with C
+  c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(205): note: see declaration of 'RayRectangle'
+c:\users\s189069\source\repos\serverassessment\server\server\session.cpp(41): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\s189069\source\repos\serverassessment\server\server\session.cpp(42): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\s189069\source\repos\serverassessment\server\server\session.cpp(139): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\s189069\source\repos\serverassessment\server\server\session.cpp(140): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
   Server.vcxproj -> C:\Users\s189069\source\repos\ServerAssessment\Server\x64\Debug\Server.exe

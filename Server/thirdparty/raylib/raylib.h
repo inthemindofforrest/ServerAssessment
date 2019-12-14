@@ -207,6 +207,15 @@ typedef struct RayRectangle {
     float y;
     float width;
     float height;
+
+	RayRectangle() {}
+	RayRectangle(float _x, float _y, float _Width, float _Height)
+	{
+		x = _x;
+		y = _y;
+		width = _Width;
+		height = _Height;
+	}
 } RayRectangle;
 
 // Image type, bpp always RGBA (32bit)

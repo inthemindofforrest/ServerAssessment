@@ -86,4 +86,5 @@ Session Sessions[SessionsAmount];
 
 	//Game Specific
 	bool SendPositionPacket();//Sends all positions to players in the session
+	bool SendBulletsPacket();//Sends all the bullets with their info
 };

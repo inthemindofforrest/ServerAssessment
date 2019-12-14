@@ -2,6 +2,19 @@
 #include <stdio.h>
 #include <mutex>
 
+//Star Functions
+
+Star::Star(){}
+Star::Star(int _X, int _Y, float _Speed, float _Size)
+{
+	Pos.Value[0] = _X;
+	Pos.Value[1] = _Y;
+	Speed = _Speed;
+	Size = _Size;
+}
+
+//Player Functions
+
 float Player::clamp(float _min, float _max, float _value)
 {
 	return (_value < _max) ? (_value > _min ? _value : _min) : _max;
@@ -39,6 +52,7 @@ Player::Player()
 
 void Player::Update(Client * _Client, Player * _Player)
 {
+	UpdateStars();
 	if ((*_Client).IsConnected)
 	{
 		if (IsKeyDown(KEY_A))
@@ -53,22 +67,24 @@ void Player::Update(Client * _Client, Player * _Player)
 		if (IsKeyDown(KEY_S) || IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_D))
 			SendClientPosition(_Client);
 
+		if (IsMouseButtonDown(0) && GetTime() - ShootTimer > ShootDelay)
+		{
+			std::string Temp = "Bullet,";
+			Temp.append(std::to_string(_Player->ClientPosition[0] + Size[0]) + ",");
+			Temp.append(std::to_string(_Player->ClientPosition[1] + (Size[1] / 2)) + ",");
+			Temp.append(std::to_string(_Player->MyColor) + ";");
+			_Client->SendPacket(Temp.c_str());
+			ShootTimer = GetTime();
+		}
+
 		//Update AllClientPositions
 		DrawClients(_Client);
+		DrawBullets(_Client);
 		Draw();
 	}
+	else
+	{
 
-	if (IsKeyDown(KEY_ONE))
-	{
-		MyColor = ColorToInt(BLUE);
-	}
-	if (IsKeyDown(KEY_TWO))
-	{
-		MyColor = ColorToInt(RED);
-	}
-	if (IsKeyDown(KEY_THREE))
-	{
-		MyColor = ColorToInt(GREEN);
 	}
 	//Manage
 	DisconnectFromServer(_Client);
@@ -80,18 +96,23 @@ void Player::Start()
 {
 	ClientPosition[0] = 0;
 	ClientPosition[1] = 0;
+	Size[0] = 50;
+	Size[1] = 20;
 	MyColor = ColorToInt(BLUE);
 	speed = 1;
+
+	for (int i = 0; i < 100; i++)
+	{
+		float TempSize = (rand() % (200 - 10 + 10) + 10) / 100;
+		float TempSpeed = TempSize * 1;
+		Stars.push_front(Star(rand() % (GetScreenWidth() - 800 + 1) + 2, rand() % (GetScreenHeight() - 450 + 1) + 2, 
+			TempSpeed, TempSize));
+	}
 }
 
 void Player::Draw()
 {
 	DrawRectangle(ClientPosition[0], ClientPosition[1], 50, 20, GetColor(MyColor));
-}
-void Player::ColorDraw()
-{
-	DrawRectangle(GetScreenWidth() / 2 - 25, GetScreenHeight() / 2 - 10 - 50, 50, 20, GetColor(MyColor));
-
 }
 
 void Player::UpdatePosition(float _NewX, float _NewY)
@@ -102,8 +123,6 @@ void Player::UpdatePosition(float _NewX, float _NewY)
 
 void Player::DrawClients(Client* _Client)
 {
-	
-
 	//Draw();
 	if ((*_Client).AllClientPositions.size() > 0)
 	{
@@ -113,6 +132,23 @@ void Player::DrawClients(Client* _Client)
 		{
 			//if ((*_Client).CompareAddresses((*i).Address));
 			DrawRectangle((*i).Value[0], (*i).Value[1], 40, 15, GetColor((*i).Color));
+		}
+		_Client->IsDrawing.unlock();
+	}
+}
+
+void Player::DrawBullets(Client* _Client)
+{
+	//Draw();
+	if ((*_Client).Bullets.size() > 0)
+	{
+		_Client->IsDrawing.lock();
+		for (std::list<Positions>::iterator i = (*_Client).Bullets.begin();
+			i != (*_Client).Bullets.end(); i++)
+		{
+			//if ((*_Client).CompareAddresses((*i).Address));
+			DrawRectangle((*i).Value[0], (*i).Value[1], 20, 5, GetColor((*i).Color));
+			//printf("Bullet Count: %d", (*_Client).Bullets.size());
 		}
 		_Client->IsDrawing.unlock();
 	}
@@ -160,11 +196,11 @@ void Player::ManageConnectionStatus(Client* _Client)
 {
 	if (!(*_Client).IsConnected)
 	{
-		ClearBackground(DARKGRAY);
-		ColorDraw();
-		int Temp = MeasureText("Press Space to join a session!", 20) / 2;
-		RayDrawText("Press Space to join a session!", (GetScreenWidth() / 2) - Temp, GetScreenHeight() / 2, 20, LIGHTGRAY);
-		RayDrawText(std::to_string(GetFrameTime() * 60 * 60).c_str(), (GetScreenWidth() / 2), 0, 20, LIGHTGRAY);
+		ClearBackground(BLACK);
+		int Temp = MeasureText("Press Space to join a session!", 30) / 2;
+		RayDrawText("Press Space to join a session!", (GetScreenWidth() / 2) - Temp, GetScreenHeight() / 2, 30, LIGHTGRAY);
+		RayDrawText("Ray Blaster 3.0", (GetScreenWidth() / 2) - MeasureText("Ray Blaster 3.0", 100) / 2, 0, 100, LIGHTGRAY);
+		RayDrawText("MULTIPLAYER", (GetScreenWidth() / 2) + (GetScreenWidth() / 4) - MeasureText("MULTIPLAYER", 30) / 2, 100, 30, RED);
 		if (IsKeyPressed(KEY_SPACE))
 		{
 			(*_Client).SendPacket("Join");
@@ -174,4 +210,20 @@ void Player::ManageConnectionStatus(Client* _Client)
 			(*_Client).SendPacket(T.c_str());
 		}
 	}
+}
+
+void Player::UpdateStars()
+{
+	for (std::list<Star>::iterator i = Stars.begin();
+		i != Stars.end(); i++)
+	{
+		i->Pos.Value[0]-= 3 * i->Speed;
+		if (i->Pos.Value[0] < 0)
+		{
+			i->Pos.Value[0] = GetScreenWidth();
+			i->Pos.Value[1] = rand() % (GetScreenHeight() - 0 + 1) + 0;
+		}
+		DrawCircle(i->Pos.Value[0], i->Pos.Value[1], 2 * i->Size, YELLOW);
+	}
+
 }

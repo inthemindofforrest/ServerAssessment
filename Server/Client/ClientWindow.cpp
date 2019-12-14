@@ -14,7 +14,7 @@ void ClientWindow::Update(Tup _Function)
 	while (!WindowShouldClose())
 	{
 		BeginDrawing();
-		ClearBackground(DARKGRAY);
+		ClearBackground(BLACK);
 		_Function();//Functions that should run while the drawing is in effect
 		EndDrawing();
 	}

@@ -1,4 +1,27 @@
-﻿  Selection.cpp
+﻿  ClientWindow.cpp
+c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(1087): warning C4190: 'GetCollisionRec' has C-linkage specified, but returns UDT 'RayRectangle' which is incompatible with C
+  c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(205): note: see declaration of 'RayRectangle'
+c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(1112): warning C4190: 'GetImageAlphaBorder' has C-linkage specified, but returns UDT 'RayRectangle' which is incompatible with C
+  c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(205): note: see declaration of 'RayRectangle'
   main.cpp
+c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(1087): warning C4190: 'GetCollisionRec' has C-linkage specified, but returns UDT 'RayRectangle' which is incompatible with C
+  c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(205): note: see declaration of 'RayRectangle'
+c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(1112): warning C4190: 'GetImageAlphaBorder' has C-linkage specified, but returns UDT 'RayRectangle' which is incompatible with C
+  c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(205): note: see declaration of 'RayRectangle'
+  Player.cpp
+c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(1087): warning C4190: 'GetCollisionRec' has C-linkage specified, but returns UDT 'RayRectangle' which is incompatible with C
+  c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(205): note: see declaration of 'RayRectangle'
+c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(1112): warning C4190: 'GetImageAlphaBorder' has C-linkage specified, but returns UDT 'RayRectangle' which is incompatible with C
+  c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(205): note: see declaration of 'RayRectangle'
+c:\users\s189069\source\repos\serverassessment\server\client\player.cpp(106): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+c:\users\s189069\source\repos\serverassessment\server\client\player.cpp(115): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+c:\users\s189069\source\repos\serverassessment\server\client\player.cpp(120): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\s189069\source\repos\serverassessment\server\client\player.cpp(121): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\s189069\source\repos\serverassessment\server\client\player.cpp(220): warning C4244: '-=': conversion from 'float' to 'int', possible loss of data
+  Selection.cpp
+c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(1087): warning C4190: 'GetCollisionRec' has C-linkage specified, but returns UDT 'RayRectangle' which is incompatible with C
+  c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(205): note: see declaration of 'RayRectangle'
+c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(1112): warning C4190: 'GetImageAlphaBorder' has C-linkage specified, but returns UDT 'RayRectangle' which is incompatible with C
+  c:\users\s189069\source\repos\serverassessment\server\thirdparty\raylib\raylib.h(205): note: see declaration of 'RayRectangle'
   Generating Code...
   Client.vcxproj -> C:\Users\s189069\source\repos\ServerAssessment\Server\x64\Debug\Client.exe

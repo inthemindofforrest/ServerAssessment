@@ -21,6 +21,9 @@ public:
 	int Value[2]{ 0 };
 	int Color;
 	bool Active;
+
+	Positions();
+	Positions(int _X, int _Y);
 };
 
 
@@ -47,6 +50,7 @@ public:
 	Client();
 
 	std::list<Positions> AllClientPositions;
+	std::list<Positions> Bullets;
 	bool IsConnected;
 
 	std::thread Receive_Thread;
@@ -70,6 +74,7 @@ public:
 	bool SendPacket();
 	bool SendPacket(const char* _data);
 	bool SendPacket(const char* _data, int _Size, int _NumData);
+	bool ForceSendPacket(const char* _data, int _Size, int _NumData);
 	bool ReceivePacket();
 	bool ClientConsole(char* _Message);
 
@@ -82,10 +87,11 @@ public:
 
 
 	std::string ParsePacket(std::string* _Packet);//Should change Packet
+	std::string ParsePacket(std::string _Packet);//Should change Packet
 
 	void ClearArray(char* _Array, int _Size);
 
 	void SortThroughUpdatingClients(std::string _CopiedString);
-
+	void UpdateBullets(std::string _CopiedString);
 
 };

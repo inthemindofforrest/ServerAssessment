@@ -1,9 +1,13 @@
 :::TODO:::
 
-Get all the Client Positions
+1) Send Clients without sending the current client
 
-If CLient is missing, Mark it as not active
-If not active client is missing again, Remove it from the list !!!IMPORTANT!!!
+
+PAKCETS:
+Bullet Format:
+-Handle IP On Server side using "from"
+	Bullet,X,Y,Color;
+
 
 
 SERVER

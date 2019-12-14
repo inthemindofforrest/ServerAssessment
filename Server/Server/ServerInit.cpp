@@ -40,6 +40,7 @@ Server::Server()
 		while (is_running)
 		{
 			SendPositionPacket();
+			SendBulletsPacket();
 			std::this_thread::sleep_for(std::chrono::milliseconds(16));
 		}
 	});
@@ -52,7 +53,6 @@ void Server::StartServer()
 	SetSocketAddress();
 
 }
-
 void Server::StartServer(char * _Address, char* _Port)
 {
 	WSAStart();
@@ -105,7 +105,6 @@ bool Server::CreateSocket()
 	}
 	return true;
 }
-
 bool Server::CreateSocket(int _AddressFamily, int _Type, int _Protocol)
 {
 	sock = socket(_AddressFamily, _Type, _Protocol);
@@ -146,7 +145,6 @@ bool Server::SetSocketAddress()
 	}
 	return true;
 }
-
 bool Server::SetSocketAddress(char* _Address, int _Port)
 {
 	local_address.sin_family = AF_INET;
@@ -230,6 +228,17 @@ void Server::ProccessPacket()
 			}
 		}
 	}
+	else if (Command.compare("Bullet") == 0)
+	{
+		for (int i = 0; i < SessionsAmount; i++)
+		{
+			if (Sessions[i].CheckForClient(from))
+			{
+				Sessions[i].CreateBullet(CopiedData, from);
+			}
+		}
+	}
+
 }
 
 void Server::CreatePacket()
@@ -242,7 +251,6 @@ void Server::CreatePacket()
 
 	//memcpy(&buffer[write_index], &is_running, sizeof(is_running));
 }
-
 void Server::CreatePacket(const char * Message)
 {
 	strcpy(SendingData, Message);
@@ -265,7 +273,6 @@ bool Server::SendPacket()
 	}
 	return true;
 }
-
 bool Server::SendPacket(const char* _Message, int _Size)
 {
 	//Send packet to Client
@@ -438,9 +445,18 @@ void Server::ServerConsole()
 		{
 			Shutdown();
 		}
-		else if(strcmp(Message, "Send") == 0)
+		else if(strcmp(Message, "send") == 0)
 		{
 			SendClientsInfo();
+		}
+		else if (strcmp(Message, "clearbullets") == 0)
+		{
+			for (int i = 0; i < SessionsAmount; i++)
+			{
+				Sessions[i].BulletLock.lock();
+				Sessions[i].Bullets.clear();
+				Sessions[i].BulletLock.unlock();
+			}
 		}
 		else
 		{
@@ -492,45 +508,6 @@ std::list<SOCKADDR_IN> Server::AllAvailableAddresses(int _SessionID)
 	return Sessions[_SessionID].AvailableClientIP();
 }
 
-
-bool Server::SendPositionPacket()
-{
-	for (int i = 0; i < SessionsAmount; i++)
-	{
-		//Get all players, and Positions to send packets
-		std::list<SOCKADDR_IN> ClientIPS = Sessions[i].AvailableClientIP();
-		std::list<Positions> ClientPos = Sessions[i].RetrieveClientPositions();
-
-		//Create the packets
-		std::string Message;
-
-		Message.append("ClientPos,");//Command for Client Positions
-	//Attach each players positions
-
-		while (ClientPos.size() > 0)
-		{
-			Message.append(SockAddrInToString(ClientPos.front().Address).c_str());
-			Message.append(",");
-
-			//X Position
-			Message.append(std::to_string(ClientPos.front().Value[0]) + ",");
-			//Y Position
-			Message.append(std::to_string(ClientPos.front().Value[1]) + ",");
-			//Color
-			Message.append(std::to_string(ClientPos.front().Color) + ";");
-			ClientPos.pop_front();
-		}
-
-		//Send Packets
-		while (ClientIPS.size() > 0)
-		{
-			SendPacket(Message.c_str(), Message.size(), ClientIPS.front());
-			ClientIPS.pop_front();
-		}
-	}
-	return true;
-}
-
 std::string Server::ParsePacket(std::string* _Packet)
 {
 	std::string Parsed;
@@ -557,4 +534,107 @@ void Server::CloseAllThreads()
 	{
 		Console_Thread.join();
 	}
+}
+
+
+//Extra
+bool Server::SendPositionPacket()
+{
+	for (int i = 0; i < SessionsAmount; i++)
+	{
+		//Get all players, and Positions to send packets
+		std::list<SOCKADDR_IN> ClientIPS = Sessions[i].AvailableClientIP();
+		std::list<Positions> ClientPos = Sessions[i].RetrieveClientPositions();
+
+		
+		//Send Packets
+		while (ClientIPS.size() > 0)
+		{
+
+			//Create the packets
+			std::string Message;
+
+			Message.append("ClientPos,");//Command for Client Positions
+
+				//Attach each players positions
+			while (ClientPos.size() > 0)
+			{
+				if (!MatchingSockAddress(ClientPos.front().Address, ClientIPS.front()))
+				{
+
+					Message.append(SockAddrInToString(ClientPos.front().Address).c_str());
+					Message.append(",");
+
+					//X Position
+					Message.append(std::to_string(ClientPos.front().Value[0]) + ",");
+					//Y Position
+					Message.append(std::to_string(ClientPos.front().Value[1]) + ",");
+					//Color
+					Message.append(std::to_string(ClientPos.front().Color) + ";");
+					ClientPos.pop_front();
+				}
+				else
+				{
+					ClientPos.pop_front();
+				}
+			}
+			SendPacket(Message.c_str(), Message.size(), ClientIPS.front());
+			ClientIPS.pop_front();
+			ClientPos = Sessions[i].RetrieveClientPositions();
+		}
+	}
+	return true;
+}
+
+bool Server::SendBulletsPacket()
+{
+	int MaxBulletsPerPacket = 20;
+	int Test = 0;
+	for (int i = 0; i < SessionsAmount; i++)
+	{
+		Sessions[i].BulletLock.lock();
+		Test = 0;
+		//Get all players, and Positions to send packets
+		std::list<SOCKADDR_IN> ClientIPS = Sessions[i].AvailableClientIP();
+		std::list<Positions> BulletInfo = Sessions[i].Bullets;
+
+		//Create the packets
+		std::string Message;
+
+		Message.append("BulletInfo,Start,");//Command for Client Positions
+	//Attach each players positions
+
+		while (BulletInfo.size() > 0)
+		{
+			//X Position
+			Message.append(std::to_string(BulletInfo.front().Value[0]) + ",");
+			//Y Position
+			Message.append(std::to_string(BulletInfo.front().Value[1]) + ",");
+			//Color
+			Message.append(std::to_string(BulletInfo.front().Color) + ";");
+			BulletInfo.pop_front();
+
+			if ((Test % MaxBulletsPerPacket) == 0 && Test != 0)
+			{
+				while (ClientIPS.size() > 0)
+				{
+					SendPacket(Message.c_str(), Message.size(), ClientIPS.front());
+					ClientIPS.pop_front();
+				}
+				Message.clear();
+				Message.append("BulletInfo,");
+				ClientIPS = Sessions[i].AvailableClientIP();
+			}
+			Test++;
+
+		}
+		Sessions[i].BulletLock.unlock();
+		//Send Packets
+		while (ClientIPS.size() > 0)
+		{
+			SendPacket(Message.c_str(), Message.size(), ClientIPS.front());
+			ClientIPS.pop_front();
+		}
+	}
+	return true;
 }

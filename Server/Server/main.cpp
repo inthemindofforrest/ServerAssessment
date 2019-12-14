@@ -3,7 +3,7 @@
 #include "ThreadManager.h"
 #define WIN32_LEAN_AND_MEAN
 #include "raylib.h"
-#include<thread>
+#include <thread>
 #include <stdio.h>
 #include <iostream>
 #include <list>
@@ -56,8 +56,20 @@ int main()
 			for (std::list<Positions>::iterator i = Pos.begin();
 				i != Pos.end(); i++)
 			{
-				DrawRectangle((*i).Value[0], (*i).Value[1], 50, 50, RED);
+				DrawRectangle((*i).Value[0], (*i).Value[1], 40, 15, GetColor((*i).Color));
 			}
+			for (std::list<Positions>::iterator i = NewServer.Sessions[j].Bullets.begin();
+				i != NewServer.Sessions[j].Bullets.end();)
+			{
+				DrawRectangle((*i).Value[0], (*i).Value[1], 20, 5, GetColor((*i).Color));
+				(*i).Value[0] ++;
+				if ((*i).Value[0] > GetScreenWidth() - 10)
+				{
+					i = NewServer.Sessions[j].Bullets.erase(i);
+				}
+				else { i++; }
+			}
+			NewServer.Sessions[j].SessionUpdate();
 		}
 
 		std::string Temp;
@@ -84,6 +96,15 @@ int main()
 				printf("Console Visibility = true\n");
 			}
 		}
+
+		if (IsKeyPressed(KEY_L))
+		{
+			for (int j = 0; j < NewServer.SessionsAmount; j++)
+			{
+				NewServer.Sessions[j].Astroids.push_front(Positions(800,200,0));
+			}
+		}
+
 		EndDrawing();
 	}
 

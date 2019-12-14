@@ -2,6 +2,13 @@
 #include <cstdlib>
 #include <string>
 
+Positions::Positions(){}
+Positions::Positions(int _X, int _Y)
+{
+	Value[0] = _X;
+	Value[1] = _Y;
+}
+
 
 Client::Client()
 {
@@ -26,7 +33,6 @@ void Client::StartClient()
 		{
 			ReceivePacket();
 		}
-		printf("Q");
 	});
 }
 
@@ -187,18 +193,17 @@ bool Client::SendPacket(const char* _data)
 		}
 		else
 		{
-			printf("Sending Package to: %d.%d.%d.%d:%d\n",
+			/*printf("Sending Package to: %d.%d.%d.%d:%d\n",
 				server_address.sin_addr.S_un.S_un_b.s_b1,
 				server_address.sin_addr.S_un.S_un_b.s_b2,
 				server_address.sin_addr.S_un.S_un_b.s_b3,
 				server_address.sin_addr.S_un.S_un_b.s_b4,
-				server_address.sin_port);
+				server_address.sin_port);*/
 		}
 		HasSentMessage = true;
 	}
 	return true;
 }
-
 bool Client::SendPacket(const char * _data, int _Size, int _NumData)
 {
 	if (is_running)
@@ -231,6 +236,32 @@ bool Client::SendPacket(const char * _data, int _Size, int _NumData)
 	}
 	return true;
 }
+bool Client::ForceSendPacket(const char* _data, int _Size, int _NumData)
+{
+	int Index = 0;
+	char temp[IDENTIFY_BUFFER_SIZE]{ '\0' };
+
+	memcpy(&temp[Index], _data, _Size);
+	Index += _Size;
+
+	flags = 0;
+	if (sendto(sock, temp, sizeof(temp), flags, (SOCKADDR*)&server_address, sizeof(server_address)) == SOCKET_ERROR)
+	{
+		printf("sendto failed: %d on line: %d", WSAGetLastError(), __LINE__);
+
+		return false;
+	}
+	else
+	{
+		printf("Sending Package to: %d.%d.%d.%d:%d\n",
+			server_address.sin_addr.S_un.S_un_b.s_b1,
+			server_address.sin_addr.S_un.S_un_b.s_b2,
+			server_address.sin_addr.S_un.S_un_b.s_b3,
+			server_address.sin_addr.S_un.S_un_b.s_b4,
+			server_address.sin_port);
+	}
+}
+
 
 bool Client::ReceivePacket()
 {
@@ -303,7 +334,7 @@ void Client::DisplayConnection(const char * _data)
 	}
 }
 
-void Client::ProcessPacket(char * _Data)//NEED TO FIX
+void Client::ProcessPacket(char * _Data)
 {
 	std::string DataCopy = _Data;
 	std::string Command;
@@ -322,6 +353,12 @@ void Client::ProcessPacket(char * _Data)//NEED TO FIX
 		SortThroughUpdatingClients(DataCopy);
 		IsDrawing.unlock();
 		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	else if (Command.compare("BulletInfo") == 0)
+	{
+		IsDrawing.lock();
+		UpdateBullets(DataCopy);
+		IsDrawing.unlock();
 	}
 }
 
@@ -349,6 +386,19 @@ std::string Client::ParsePacket(std::string* _Packet)
 	return Parsed;
 }
 
+std::string Client::ParsePacket(std::string _Packet)
+{
+	std::string Parsed;
+
+	while ((_Packet)[0] != ',' && (_Packet)[0] != ';' && (_Packet)[0] != '\0')
+	{
+		Parsed += (_Packet)[0];
+		(_Packet).erase(0, 1);
+	}
+
+	return Parsed;
+}
+
 void Client::ClearArray(char * _Array, int _Size)
 {
 	for (int i = 0; i < _Size; i++)
@@ -369,5 +419,22 @@ void Client::SortThroughUpdatingClients(std::string _CopiedString)
 		TempClient.Value[1] = std::stoi(ParsePacket(&_CopiedString).c_str());
 		TempClient.Color = std::stoi(ParsePacket(&_CopiedString).c_str());
 		AllClientPositions.push_back(TempClient);
+	}
+}
+
+void Client::UpdateBullets(std::string _CopiedString)
+{
+	if (ParsePacket(_CopiedString) == "Start")
+	{
+		Bullets.clear();
+		ParsePacket(&_CopiedString);
+	}
+	while (_CopiedString[0] != '\0')
+	{
+		Positions TempBullet;
+		TempBullet.Value[0] = std::stoi(ParsePacket(&_CopiedString).c_str());
+		TempBullet.Value[1] = std::stoi(ParsePacket(&_CopiedString).c_str());
+		TempBullet.Color = std::stoi(ParsePacket(&_CopiedString).c_str());
+		Bullets.push_back(TempBullet);
 	}
 }
