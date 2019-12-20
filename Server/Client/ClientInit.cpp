@@ -353,6 +353,10 @@ void Client::ProcessPacket(char * _Data)
 		SortThroughUpdatingClients(DataCopy);
 		IsDrawing.unlock();
 	}
+	else if (Command.compare("CurrentClientScore") == 0)
+	{
+		MyScore = std::stoi(ParsePacket(&DataCopy).c_str());
+	}
 	else if (Command.compare("BulletInfo") == 0)
 	{
 		IsDrawing.lock();
@@ -422,6 +426,7 @@ void Client::SortThroughUpdatingClients(std::string _CopiedString)
 		TempClient.Address.sin_addr.S_un.S_addr = inet_addr(ParsePacket(&_CopiedString).c_str());
 		TempClient.Value[0] = std::stoi(ParsePacket(&_CopiedString).c_str());
 		TempClient.Value[1] = std::stoi(ParsePacket(&_CopiedString).c_str());
+		TempClient.Score = std::stoi(ParsePacket(&_CopiedString).c_str());
 		TempClient.Color = std::stoi(ParsePacket(&_CopiedString).c_str());
 		AllClientPositions.push_back(TempClient);
 	}

@@ -570,12 +570,20 @@ bool Server::SendPositionPacket()
 					Message.append(std::to_string(ClientPos.front().Value[0]) + ",");
 					//Y Position
 					Message.append(std::to_string(ClientPos.front().Value[1]) + ",");
+					//Score
+					Message.append(std::to_string(ClientPos.front().Score) + ",");
 					//Color
 					Message.append(std::to_string(ClientPos.front().Color) + ";");
 					ClientPos.pop_front();
 				}
 				else
 				{
+					std::string QuickMessage;
+
+					QuickMessage.append("CurrentClientScore,");//Command for Client Positions
+					QuickMessage.append(std::to_string(ClientPos.front().Score) + ";");
+					SendPacket(QuickMessage.c_str(), QuickMessage.size(), ClientPos.front().Address);
+
 					ClientPos.pop_front();
 				}
 			}

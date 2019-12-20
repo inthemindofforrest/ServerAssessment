@@ -13,6 +13,7 @@ public:
 	SOCKADDR_IN Address;
 	int Value[2]{0};
 	int Color;
+	int Score = 0;
 
 	bool operator==(const Positions _Other);
 	Positions();
@@ -24,7 +25,9 @@ class Session
 private:
 	static const int MaxClientAmount = 3;//Forever the max players allowed in the session
 
-	
+	void UpdateAstroids();
+	void UpdateBullets();
+	void UpdateClients();
 
 public:
 	Positions ClientPositions[MaxClientAmount];
@@ -34,6 +37,7 @@ public:
 
 	std::list<Positions> Bullets;
 	std::list<Positions> Astroids;
+	float AstTimer = GetTime();
 	std::mutex BulletLock;
 	std::mutex AstroidLock;
 

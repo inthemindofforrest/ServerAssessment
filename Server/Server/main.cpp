@@ -42,6 +42,8 @@ int main()
 	SetTargetFPS(60);
 	system("CLS");
 
+	//float AstroidTimer = GetTime();
+
 	while (!WindowShouldClose())    
 	{
 		BeginDrawing();
@@ -61,6 +63,20 @@ int main()
 		std::string Text = ("Server: \n" + Temp);
 		RayDrawText(Text.c_str(), 0, 0, 20, LIGHTGRAY);
 
+		Temp.clear();
+		for (int i = 0; i < 3; i++)
+		{
+			Temp.append("Player(" + std::to_string(i) + "): " + std::to_string(NewServer.Sessions[0].ClientPositions[i].Score) + "\n");
+		}
+		Text = ("Server: \n" + Temp);
+		RayDrawText(Text.c_str(), 0, 200, 20, LIGHTGRAY);
+
+		Temp.clear();
+		Temp = "Astroids: " + std::to_string(NewServer.Sessions[0].Astroids.size());
+		Text.clear();
+		Text = ("Astroids(0): \n" + Temp);
+		RayDrawText(Text.c_str(), 650, 0, 20, BLUE);
+
 
 		if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C))
 		{
@@ -78,11 +94,20 @@ int main()
 			}
 		}
 
-		if (IsKeyPressed(KEY_L))
+		for (int j = 0; j < NewServer.SessionsAmount; j++)
 		{
-			for (int j = 0; j < NewServer.SessionsAmount; j++)
+
+			if (NewServer.Sessions[j].CurrentClientAmount > 0 && GetTime() - NewServer.Sessions[j].AstTimer > 1)
 			{
-				NewServer.Sessions[j].Astroids.push_front(Positions(800,200,0));
+				for (int k = 0; k < NewServer.Sessions[j].CurrentClientAmount; k++)
+				{
+					NewServer.Sessions[j].Astroids.push_front(Positions(GetScreenWidth() + 50, rand() % (GetScreenHeight() - 40 - 80 + 1) + 80, 0));
+					NewServer.Sessions[j].AstTimer = GetTime();
+				}
+			}
+			else if (NewServer.Sessions[j].CurrentClientAmount == 0)
+			{
+				NewServer.Sessions[j].Astroids.clear();
 			}
 		}
 

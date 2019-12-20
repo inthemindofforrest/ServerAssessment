@@ -36,7 +36,7 @@ public:
 	//void Update(Client* _Client);
 	void Update(Client* _Client, Player* _Player);
 	void Start();
-	void Draw();
+	void Draw(Client * _Client);
 
 	void UpdatePosition(float _NewX, float _NewY);
 

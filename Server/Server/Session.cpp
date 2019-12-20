@@ -21,57 +21,111 @@ bool Positions::operator==(const Positions _Other)
 		(Value[0] == _Other.Value[0] && Value[1] == _Other.Value[1]);
 }
 
-Session::Session()
-{
-	for (int i = 0; i < MaxClientAmount; i++)
-	{
-		Clients[i].sin_addr.S_un.S_addr = inet_addr("0.0.0.0");
-		Clients[i].sin_port = htons(0);
-	}
-}
 
-void Session::SessionUpdate()
+//PRIVATE:
+void Session::UpdateAstroids()
 {
 	for (std::list<Positions>::iterator i = Astroids.begin();
 		i != Astroids.end();)
 	{
+		if ((*i).Value[0] < 0)
+		{
+			i = Astroids.erase(i);
+			continue;
+		}
 		i->Value[0]--;
 		for (std::list<Positions>::iterator j = Bullets.begin();
 			j != Bullets.end();)
 		{
 			if (CheckCollisionRecs(RayRectangle(i->Value[0], i->Value[1], 50, 50),
-				RayRectangle(j->Value[0], j->Value[1], 20, 5)) ||
-				(*i).Value[0] < 0)
+				RayRectangle(j->Value[0], j->Value[1], 20, 5)))
 			{
+				for (int i = 0; i < MaxClientAmount; i++)
+				{
+					if (MatchingSockAddress(Clients[i], (*j).Address))
+					{
+						ClientPositions[i].Score++;
+					}
+				}
+
 				i = Astroids.erase(i);
 				j = Bullets.erase(j);
 				goto JumpPoint;
 			}
 			j++;
 		}
-		DrawRectangle(i->Value[0], i->Value[1], 50, 50, WHITE);
+		for (int j = 0; j < MaxClientAmount; j++)
+		{
+			if (CheckCollisionRecs(RayRectangle(i->Value[0], i->Value[1], 50, 50),
+				RayRectangle(ClientPositions[j].Value[0], ClientPositions[j].Value[1], 50, 20)))
+			{
+				for (int i = 0; i < MaxClientAmount; i++)
+				{
+					if (MatchingSockAddress(Clients[i], ClientPositions[j].Address))
+					{
+						ClientPositions[i].Score = 0;
+					}
+				}
+
+				i = Astroids.erase(i);
+				goto JumpPoint;
+			}
+		}
+
+		Color AstColor;
+		AstColor.r = 100;
+		AstColor.b = 100;
+		AstColor.g = 100;
+		AstColor.a = 50;
+
+		DrawRectangle(i->Value[0], i->Value[1], 50, 50, AstColor);
 		i++;
 
 	JumpPoint: NULL;
 	}
+}
 
-	std::list<Positions> Pos = RetrieveClientPositions();
-	for (std::list<Positions>::iterator i = Pos.begin();
-		i != Pos.end(); i++)
-	{
-		DrawRectangle((*i).Value[0], (*i).Value[1], 40, 15, GetColor((*i).Color));
-	}
+void Session::UpdateBullets()
+{
 	for (std::list<Positions>::iterator i = Bullets.begin();
 		i != Bullets.end();)
 	{
 		DrawRectangle((*i).Value[0], (*i).Value[1], 20, 5, GetColor((*i).Color));
-		(*i).Value[0] ++;
+		(*i).Value[0] += 3;
 		if ((*i).Value[0] > GetScreenWidth() - 10)
 		{
 			i = Bullets.erase(i);
 		}
 		else { i++; }
 	}
+}
+
+void Session::UpdateClients()
+{
+	std::list<Positions> Pos = RetrieveClientPositions();
+	for (std::list<Positions>::iterator i = Pos.begin();
+		i != Pos.end(); i++)
+	{
+		DrawRectangle((*i).Value[0], (*i).Value[1], 40, 15, GetColor((*i).Color));
+	}
+}
+
+//PUBLIC:
+Session::Session()
+{
+	for (int i = 0; i < MaxClientAmount; i++)
+	{
+		Clients[i].sin_addr.S_un.S_addr = inet_addr("0.0.0.0");
+		Clients[i].sin_port = htons(0);
+		ClientPositions->Score = 0;
+	}
+}
+
+void Session::SessionUpdate()
+{
+	UpdateAstroids();
+	UpdateBullets();
+	UpdateClients();
 }
 
 bool Session::AddClientToSession(SOCKADDR_IN _Address)
@@ -101,6 +155,7 @@ bool Session::RemoveClientFromSession(SOCKADDR_IN _Address)
 		{
 			Clients[i].sin_port = 0;
 			CurrentClientAmount--;
+			ClientPositions[i].Score = 0;
 			return true;
 		}
 	}

@@ -20,6 +20,7 @@ public:
 	SOCKADDR_IN Address;
 	int Value[2]{ 0 };
 	int Color;
+	int Score;
 	bool Active;
 
 	Positions();
@@ -52,6 +53,7 @@ public:
 	std::list<Positions> AllClientPositions;
 	std::list<Positions> Bullets;
 	std::list<Positions> Astroids;
+	int MyScore;
 	bool IsConnected;
 
 	std::thread Receive_Thread;
@@ -95,5 +97,6 @@ public:
 	void SortThroughUpdatingClients(std::string _CopiedString);
 	void UpdateBullets(std::string _CopiedString);
 	void UpdateAstroids(std::string _CopiedString);
+	void UpdateScores(std::string _CopiedString);
 
 };

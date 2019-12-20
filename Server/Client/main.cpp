@@ -16,13 +16,29 @@ void PlayerUpdate(Client* _Client, Player* _Player)
 	if (!(*_Client).IsConnected)
 	{
 		Selection.Update(PlayerPointer);
+		
 	}
-	PlayerPointer->DrawAstroids(_Client);
+	else
+	{
+		PlayerPointer->DrawAstroids(_Client);
+	}
+	
+}
+
+void PlayerServerInput(char * _IP, int* _Port)
+{
+	char TempHolder[IDENTIFY_BUFFER_SIZE];
+	printf("IPv4: ");
+	gets_s(_IP, IDENTIFY_BUFFER_SIZE);
+	printf("Port: ");
+	gets_s(TempHolder, IDENTIFY_BUFFER_SIZE);
+	*_Port = std::stoi(TempHolder);
 }
 
 int main()
 {
-	ShowWindow(GetConsoleWindow(), SW_HIDE);// HIdes the console window
+	char IPAdd[IDENTIFY_BUFFER_SIZE];
+	int Port;
 
 	ClientWindow NewWindow;
 	Player P;
@@ -33,6 +49,10 @@ int main()
 
 	P.Start();
 	PlayerPointer = &P;
+
+	//PlayerServerInput(IPAdd, &Port);
+
+	//NewClient.StartCustomClient(IPAdd, Port);
 	NewClient.StartClient();
 	NewWindow.InitClientWindow();
 	
@@ -43,6 +63,8 @@ int main()
 			NewClient.UpdateClient();
 		}
 	});
+	
+	ShowWindow(GetConsoleWindow(), SW_HIDE);// HIdes the console window
 
 	NewWindow.Update(PlayerUpdate, &NewClient, PlayerPointer);
 

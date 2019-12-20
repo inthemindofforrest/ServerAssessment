@@ -25,31 +25,6 @@ Player::Player()
 	Start();
 }
 
-//void Player::Update(Client* _Client)
-//{
-//	if (IsKeyDown(KEY_A))
-//		UpdatePosition(ClientPosition[0] - speed, ClientPosition[1]);
-//	if (IsKeyDown(KEY_D))
-//		UpdatePosition(ClientPosition[0] + speed, ClientPosition[1]);
-//	if (IsKeyDown(KEY_W))
-//		UpdatePosition(ClientPosition[0], ClientPosition[1] - speed);
-//	if (IsKeyDown(KEY_S))
-//		UpdatePosition(ClientPosition[0], ClientPosition[1] + speed);
-//
-//	if (IsKeyDown(KEY_S) || IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_D))
-//		SendClientPosition(_Client);
-//
-//	//Update AllClientPositions
-//	DrawClients(_Client);
-//	//Draw();
-//
-//
-//	//Manage
-//	DisconnectFromServer(_Client);
-//	ConsoleDisplay();
-//	ManageConnectionStatus(_Client);
-//}
-
 void Player::Update(Client * _Client, Player * _Player)
 {
 	UpdateStars();
@@ -81,7 +56,7 @@ void Player::Update(Client * _Client, Player * _Player)
 		DrawClients(_Client);
 		DrawBullets(_Client);
 		DrawAstroids(_Client);
-		Draw();
+		Draw(_Client);
 	}
 	else
 	{
@@ -100,7 +75,7 @@ void Player::Start()
 	Size[0] = 50;
 	Size[1] = 20;
 	MyColor = ColorToInt(BLUE);
-	speed = 1;
+	speed = 2;
 
 	for (int i = 0; i < 100; i++)
 	{
@@ -111,15 +86,16 @@ void Player::Start()
 	}
 }
 
-void Player::Draw()
+void Player::Draw(Client * _Client)
 {
 	DrawRectangle(ClientPosition[0], ClientPosition[1], 50, 20, GetColor(MyColor));
+	RayDrawText(std::to_string(_Client->MyScore).c_str(), GetScreenWidth() / 2 - MeasureText(std::to_string(_Client->MyScore).c_str(), 80) / 2, 0, 80, WHITE);
 }
 
 void Player::UpdatePosition(float _NewX, float _NewY)
 {
-	ClientPosition[0] = clamp(0, GetScreenWidth(), _NewX);
-	ClientPosition[1] = clamp(0, GetScreenHeight(), _NewY);
+	ClientPosition[0] = clamp(0, GetScreenWidth() - 50, _NewX);
+	ClientPosition[1] = clamp(80, GetScreenHeight() - 20, _NewY);
 }
 
 void Player::DrawClients(Client* _Client)
@@ -132,6 +108,7 @@ void Player::DrawClients(Client* _Client)
 			i != (*_Client).AllClientPositions.end(); i++)
 		{
 			DrawRectangle((*i).Value[0], (*i).Value[1], 40, 15, GetColor((*i).Color));
+			RayDrawText(std::to_string((*i).Score).c_str(), (*i).Value[0] + 15, (*i).Value[1] - 25, 25, WHITE);
 		}
 		_Client->IsDrawing.unlock();
 	}
@@ -182,6 +159,9 @@ void Player::DisconnectFromServer(Client * _Client)
 	{
 		(*_Client).SendPacket("Disconnect", 10, 0);
 		(*_Client).IsConnected = false;
+		ClientPosition[0] = 0;
+		ClientPosition[1] = 80;
+
 	}
 }
 
