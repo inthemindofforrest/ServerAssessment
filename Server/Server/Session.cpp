@@ -37,15 +37,40 @@ void Session::SessionUpdate()
 	{
 		i->Value[0]--;
 		for (std::list<Positions>::iterator j = Bullets.begin();
-			j != Bullets.end(); j++)
+			j != Bullets.end();)
+		{
 			if (CheckCollisionRecs(RayRectangle(i->Value[0], i->Value[1], 50, 50),
-				RayRectangle(j->Value[0], j->Value[1], 20, 5)))
+				RayRectangle(j->Value[0], j->Value[1], 20, 5)) ||
+				(*i).Value[0] < 0)
 			{
 				i = Astroids.erase(i);
-				break;
+				j = Bullets.erase(j);
+				goto JumpPoint;
 			}
-		i++;
+			j++;
+		}
 		DrawRectangle(i->Value[0], i->Value[1], 50, 50, WHITE);
+		i++;
+
+	JumpPoint: NULL;
+	}
+
+	std::list<Positions> Pos = RetrieveClientPositions();
+	for (std::list<Positions>::iterator i = Pos.begin();
+		i != Pos.end(); i++)
+	{
+		DrawRectangle((*i).Value[0], (*i).Value[1], 40, 15, GetColor((*i).Color));
+	}
+	for (std::list<Positions>::iterator i = Bullets.begin();
+		i != Bullets.end();)
+	{
+		DrawRectangle((*i).Value[0], (*i).Value[1], 20, 5, GetColor((*i).Color));
+		(*i).Value[0] ++;
+		if ((*i).Value[0] > GetScreenWidth() - 10)
+		{
+			i = Bullets.erase(i);
+		}
+		else { i++; }
 	}
 }
 

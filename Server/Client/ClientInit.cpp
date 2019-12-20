@@ -352,12 +352,17 @@ void Client::ProcessPacket(char * _Data)
 		IsDrawing.lock();
 		SortThroughUpdatingClients(DataCopy);
 		IsDrawing.unlock();
-		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	else if (Command.compare("BulletInfo") == 0)
 	{
 		IsDrawing.lock();
 		UpdateBullets(DataCopy);
+		IsDrawing.unlock();
+	}
+	else if (Command.compare("AstroidInfo") == 0)
+	{
+		IsDrawing.lock();
+	    UpdateAstroids(DataCopy);
 		IsDrawing.unlock();
 	}
 }
@@ -436,5 +441,22 @@ void Client::UpdateBullets(std::string _CopiedString)
 		TempBullet.Value[1] = std::stoi(ParsePacket(&_CopiedString).c_str());
 		TempBullet.Color = std::stoi(ParsePacket(&_CopiedString).c_str());
 		Bullets.push_back(TempBullet);
+	}
+}
+
+void Client::UpdateAstroids(std::string _CopiedString)
+{
+	if (ParsePacket(_CopiedString) == "Start")
+	{
+		Astroids.clear();
+		ParsePacket(&_CopiedString);
+	}
+	while (_CopiedString[0] != '\0')
+	{
+		Positions TempAstroid;
+		TempAstroid.Value[0] = std::stoi(ParsePacket(&_CopiedString).c_str());
+		TempAstroid.Value[1] = std::stoi(ParsePacket(&_CopiedString).c_str());
+		TempAstroid.Color = std::stoi(ParsePacket(&_CopiedString).c_str());
+		Astroids.push_back(TempAstroid);
 	}
 }

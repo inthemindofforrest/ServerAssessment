@@ -51,6 +51,7 @@ public:
 
 	std::list<Positions> AllClientPositions;
 	std::list<Positions> Bullets;
+	std::list<Positions> Astroids;
 	bool IsConnected;
 
 	std::thread Receive_Thread;
@@ -93,5 +94,6 @@ public:
 
 	void SortThroughUpdatingClients(std::string _CopiedString);
 	void UpdateBullets(std::string _CopiedString);
+	void UpdateAstroids(std::string _CopiedString);
 
 };

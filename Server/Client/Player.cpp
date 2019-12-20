@@ -80,6 +80,7 @@ void Player::Update(Client * _Client, Player * _Player)
 		//Update AllClientPositions
 		DrawClients(_Client);
 		DrawBullets(_Client);
+		DrawAstroids(_Client);
 		Draw();
 	}
 	else
@@ -104,7 +105,7 @@ void Player::Start()
 	for (int i = 0; i < 100; i++)
 	{
 		float TempSize = (rand() % (200 - 10 + 10) + 10) / 100;
-		float TempSpeed = TempSize * 1;
+		float TempSpeed = TempSize * .5f;
 		Stars.push_front(Star(rand() % (GetScreenWidth() - 800 + 1) + 2, rand() % (GetScreenHeight() - 450 + 1) + 2, 
 			TempSpeed, TempSize));
 	}
@@ -130,7 +131,6 @@ void Player::DrawClients(Client* _Client)
 		for (std::list<Positions>::iterator i = (*_Client).AllClientPositions.begin();
 			i != (*_Client).AllClientPositions.end(); i++)
 		{
-			//if ((*_Client).CompareAddresses((*i).Address));
 			DrawRectangle((*i).Value[0], (*i).Value[1], 40, 15, GetColor((*i).Color));
 		}
 		_Client->IsDrawing.unlock();
@@ -146,9 +146,22 @@ void Player::DrawBullets(Client* _Client)
 		for (std::list<Positions>::iterator i = (*_Client).Bullets.begin();
 			i != (*_Client).Bullets.end(); i++)
 		{
-			//if ((*_Client).CompareAddresses((*i).Address));
 			DrawRectangle((*i).Value[0], (*i).Value[1], 20, 5, GetColor((*i).Color));
-			//printf("Bullet Count: %d", (*_Client).Bullets.size());
+		}
+		_Client->IsDrawing.unlock();
+	}
+}
+
+void Player::DrawAstroids(Client* _Client)
+{
+	//Draw();
+	if ((*_Client).Astroids.size() > 0)
+	{
+		_Client->IsDrawing.lock();
+		for (std::list<Positions>::iterator i = (*_Client).Astroids.begin();
+			i != (*_Client).Astroids.end(); i++)
+		{
+			DrawRectangle((*i).Value[0], (*i).Value[1], 50, 50, DARKGRAY);
 		}
 		_Client->IsDrawing.unlock();
 	}

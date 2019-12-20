@@ -35,6 +35,7 @@ public:
 	std::list<Positions> Bullets;
 	std::list<Positions> Astroids;
 	std::mutex BulletLock;
+	std::mutex AstroidLock;
 
 	Session();
 

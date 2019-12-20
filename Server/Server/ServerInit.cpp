@@ -40,6 +40,7 @@ Server::Server()
 		while (is_running)
 		{
 			SendPositionPacket();
+			SendAstroidsPacket();
 			SendBulletsPacket();
 			std::this_thread::sleep_for(std::chrono::milliseconds(16));
 		}
@@ -629,6 +630,59 @@ bool Server::SendBulletsPacket()
 
 		}
 		Sessions[i].BulletLock.unlock();
+		//Send Packets
+		while (ClientIPS.size() > 0)
+		{
+			SendPacket(Message.c_str(), Message.size(), ClientIPS.front());
+			ClientIPS.pop_front();
+		}
+	}
+	return true;
+}
+
+bool Server::SendAstroidsPacket()
+{
+	int MaxAstroidsPerPacket = 20;
+	int Test = 0;
+	for (int i = 0; i < SessionsAmount; i++)
+	{
+		Sessions[i].AstroidLock.lock();
+		Test = 0;
+		//Get all players, and Positions to send packets
+		std::list<SOCKADDR_IN> ClientIPS = Sessions[i].AvailableClientIP();
+		std::list<Positions> AstroidInfo = Sessions[i].Astroids;
+
+		//Create the packets
+		std::string Message;
+
+		Message.append("AstroidInfo,Start,");//Command for Client Positions
+	//Attach each players positions
+
+		while (AstroidInfo.size() > 0)
+		{
+			//X Position
+			Message.append(std::to_string(AstroidInfo.front().Value[0]) + ",");
+			//Y Position
+			Message.append(std::to_string(AstroidInfo.front().Value[1]) + ",");
+			//Color
+			Message.append(std::to_string(AstroidInfo.front().Color) + ";");
+			AstroidInfo.pop_front();
+
+			if ((Test % MaxAstroidsPerPacket) == 0 && Test != 0)
+			{
+				while (ClientIPS.size() > 0)
+				{
+					SendPacket(Message.c_str(), Message.size(), ClientIPS.front());
+					ClientIPS.pop_front();
+				}
+				Message.clear();
+				Message.append("AstroidInfo,");
+				ClientIPS = Sessions[i].AvailableClientIP();
+			}
+			Test++;
+
+		}
+		Sessions[i].AstroidLock.unlock();
 		//Send Packets
 		while (ClientIPS.size() > 0)
 		{

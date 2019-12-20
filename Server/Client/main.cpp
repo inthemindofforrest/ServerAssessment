@@ -17,6 +17,7 @@ void PlayerUpdate(Client* _Client, Player* _Player)
 	{
 		Selection.Update(PlayerPointer);
 	}
+	PlayerPointer->DrawAstroids(_Client);
 }
 
 int main()

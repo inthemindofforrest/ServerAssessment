@@ -32,8 +32,6 @@ int main()
 
 #pragma region Visuals
 
-
-
 	//int screenWidth = 250;
 	//int screenHeight = 200;
 	int screenWidth = 800;
@@ -52,23 +50,6 @@ int main()
 
 		for (int j = 0; j < NewServer.SessionsAmount; j++)
 		{
-			std::list<Positions> Pos = NewServer.Sessions[j].RetrieveClientPositions();
-			for (std::list<Positions>::iterator i = Pos.begin();
-				i != Pos.end(); i++)
-			{
-				DrawRectangle((*i).Value[0], (*i).Value[1], 40, 15, GetColor((*i).Color));
-			}
-			for (std::list<Positions>::iterator i = NewServer.Sessions[j].Bullets.begin();
-				i != NewServer.Sessions[j].Bullets.end();)
-			{
-				DrawRectangle((*i).Value[0], (*i).Value[1], 20, 5, GetColor((*i).Color));
-				(*i).Value[0] ++;
-				if ((*i).Value[0] > GetScreenWidth() - 10)
-				{
-					i = NewServer.Sessions[j].Bullets.erase(i);
-				}
-				else { i++; }
-			}
 			NewServer.Sessions[j].SessionUpdate();
 		}
 
@@ -109,7 +90,7 @@ int main()
 	}
 
 	RayCloseWindow();
-#pragma endregion
+	#pragma endregion
 	NewServer.CloseAllThreads();
 	return 0;
 }

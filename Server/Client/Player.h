@@ -42,6 +42,7 @@ public:
 
 	void DrawClients(Client* _Client);
 	void DrawBullets(Client* _Client);
+	void DrawAstroids(Client* _Client);
 
 	void SendClientPosition(Client* _Client);
 
