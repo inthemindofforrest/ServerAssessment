@@ -86,9 +86,8 @@ void Client::StartCustomClient(const char* _IP, int _Port)
 	AssignServerSocket();
 
 	is_running = true;
-	SendPacket("Join");
-
-
+	HasSentMessage = false;
+	IsConnected = false;
 
 	Receive_Thread = std::thread([&]
 	{

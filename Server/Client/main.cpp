@@ -25,20 +25,16 @@ void PlayerUpdate(Client* _Client, Player* _Player)
 	
 }
 
-void PlayerServerInput(char * _IP, int* _Port)
+void PlayerServerInput(char * _IP)
 {
 	char TempHolder[IDENTIFY_BUFFER_SIZE];
 	printf("IPv4: ");
 	gets_s(_IP, IDENTIFY_BUFFER_SIZE);
-	printf("Port: ");
-	gets_s(TempHolder, IDENTIFY_BUFFER_SIZE);
-	*_Port = std::stoi(TempHolder);
 }
 
 int main()
 {
 	char IPAdd[IDENTIFY_BUFFER_SIZE];
-	int Port;
 
 	ClientWindow NewWindow;
 	Player P;
@@ -50,10 +46,10 @@ int main()
 	P.Start();
 	PlayerPointer = &P;
 
-	//PlayerServerInput(IPAdd, &Port);
+	PlayerServerInput(IPAdd);
 
-	//NewClient.StartCustomClient(IPAdd, Port);
-	NewClient.StartClient();
+	NewClient.StartCustomClient(IPAdd, 9999);
+	//NewClient.StartClient();
 	NewWindow.InitClientWindow();
 	
 	Client_Thread = std::thread([&]
